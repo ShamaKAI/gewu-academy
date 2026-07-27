@@ -6,7 +6,7 @@
     nixPkgs = ["nodejs_22"]
 
 [deploy]
-  healthcheckPath = "/zh"
+  healthcheckPath = "/"
   startCommand = "npm start"
 
 [build.environment]
