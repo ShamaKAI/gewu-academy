@@ -1,0 +1,9 @@
+[build]
+  builder = "nixpacks"
+  [build.config]
+    installCommand = "npm install"
+    buildCommand = "npm run build"
+
+[deploy]
+  healthcheckPath = "/zh"
+  startCommand = "npm start"
