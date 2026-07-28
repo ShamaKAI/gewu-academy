@@ -22,6 +22,7 @@ export default function PptModule({ pptFiles, s }: PptModuleProps) {
   const [strokeWidth, setStrokeWidth] = useState(2);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fabricCanvasRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -37,12 +38,14 @@ export default function PptModule({ pptFiles, s }: PptModuleProps) {
     if (!previewMode || !canvasRef.current) return;
 
     let cancelled = false;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let fc: any = null;
 
     const initFabric = async () => {
       try {
         const fabricModule = await import("fabric");
         // fabric v7.4.0 uses named exports
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { Canvas, PencilBrush } = fabricModule as any;
 
         if (cancelled || !canvasRef.current) return;
@@ -144,11 +147,13 @@ export default function PptModule({ pptFiles, s }: PptModuleProps) {
           selectable: true,
         };
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         import("fabric").then((mod: any) => {
           const { Rect, Circle, Line } = mod;
           const fc = fabricCanvasRef.current;
           if (!fc) return;
 
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           let shape: any;
           switch (t) {
             case "rect":

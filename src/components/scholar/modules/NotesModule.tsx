@@ -70,8 +70,8 @@ export default function NotesModule({ content, s }: NotesModuleProps) {
 
       const data = await response.json();
       setNotes(data.choices[0]?.message?.content || "无法生成笔记");
-    } catch (err: any) {
-      setError(err.message || "生成失败，请重试");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "生成失败，请重试");
     } finally {
       setLoading(false);
     }
