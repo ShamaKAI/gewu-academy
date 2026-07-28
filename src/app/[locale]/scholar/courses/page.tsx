@@ -69,7 +69,7 @@ export default function CoursesPage() {
         >
           {s.courses_title}
         </h1>
-        <p className="text-[14px] text-[#666] m-0" style={{ fontFamily: "var(--font-serif)" }}>
+        <p className="text-[14px] text-[#000] m-0" style={{ fontFamily: "var(--font-serif)" }}>
           {filtered.length} 门课程
         </p>
       </div>
@@ -79,7 +79,7 @@ export default function CoursesPage() {
 
       {/* Course list */}
       {filtered.length === 0 ? (
-        <p className="text-center text-[#999] py-20 text-[14px]" style={{ fontFamily: "var(--font-serif)" }}>
+        <p className="text-center text-[#000] py-20 text-[14px]" style={{ fontFamily: "var(--font-serif)" }}>
           {s.no_courses_found}
         </p>
       ) : (

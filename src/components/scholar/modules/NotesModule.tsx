@@ -89,7 +89,7 @@ export default function NotesModule({ content, s }: NotesModuleProps) {
         disabled={loading}
         className={`px-6 py-2.5 rounded-[10px] text-[14px] font-bold border-none cursor-pointer transition-colors mb-6 ${
           loading
-            ? "bg-[#e0e0e0] text-[#999] cursor-not-allowed"
+            ? "bg-[#e0e0e0] text-[#000] cursor-not-allowed"
             : "bg-[#333] text-white hover:bg-[#555]"
         }`}
         style={{ fontFamily: "var(--font-serif)" }}

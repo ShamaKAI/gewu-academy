@@ -257,7 +257,7 @@ export default function KnowledgeTree({ chapters, sections, locale, onNodeClick 
 
   if (chapters.length === 0) {
     const el = locale==="en"?"No knowledge tree":locale==="ms"?"Tiada pohon ilmu":"暂无知识图谱";
-    return <div className="flex items-center justify-center h-full text-[#999] text-[13px]" style={{ fontFamily: "var(--font-serif)" }}>{el}</div>;
+    return <div className="flex items-center justify-center h-full text-[#000] text-[13px]" style={{ fontFamily: "var(--font-serif)" }}>{el}</div>;
   }
 
   return (

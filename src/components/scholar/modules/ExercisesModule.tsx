@@ -82,7 +82,7 @@ export default function ExercisesModule({ exercises, s }: ExercisesModuleProps) 
         <h2 className="text-[20px] text-[#000] font-bold m-0 mb-5" style={{ fontFamily: "var(--font-serif)" }}>
           {s.tab_exercises}
         </h2>
-        <p className="text-[#999] text-[14px] py-8" style={{ fontFamily: "var(--font-serif)" }}>
+        <p className="text-[#000] text-[14px] py-8" style={{ fontFamily: "var(--font-serif)" }}>
           暂无课后习题
         </p>
       </div>
@@ -101,7 +101,7 @@ export default function ExercisesModule({ exercises, s }: ExercisesModuleProps) 
         <div className="mb-6 p-5 bg-[#f7f7f7] rounded-[12px] border border-[#eee]">
           <p className="text-[16px] text-[#000] font-bold m-0" style={{ fontFamily: "var(--font-serif)" }}>
             {s.exercise_score}: {score} / {exercises.length}
-            <span className="text-[14px] text-[#666] font-normal ml-2">
+            <span className="text-[14px] text-[#000] font-normal ml-2">
               ({Math.round((score / exercises.length) * 100)}%)
             </span>
           </p>
@@ -126,7 +126,7 @@ export default function ExercisesModule({ exercises, s }: ExercisesModuleProps) 
               {/* Question header */}
               <div className="flex items-start gap-3 mb-3">
                 <span
-                  className="text-[12px] text-[#999] flex-shrink-0 mt-0.5 font-bold"
+                  className="text-[12px] text-[#000] flex-shrink-0 mt-0.5 font-bold"
                   style={{ fontFamily: "var(--font-display)" }}
                 >
                   {i + 1}.
@@ -140,7 +140,7 @@ export default function ExercisesModule({ exercises, s }: ExercisesModuleProps) 
                     style={{
                       fontFamily: "var(--font-serif)",
                       background: "#eee",
-                      color: "#666",
+                      color: "#000",
                     }}
                   >
                     {q.type === "single"
@@ -190,7 +190,7 @@ export default function ExercisesModule({ exercises, s }: ExercisesModuleProps) 
                         className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-[8px] text-[14px] text-left border cursor-pointer transition-colors ${
                           isSelected
                             ? "bg-[#e8e8e8] border-[#999] text-[#333] font-bold"
-                            : "bg-white border-[#eee] text-[#666] hover:border-[#ccc]"
+                            : "bg-white border-[#eee] text-[#000] hover:border-[#ccc]"
                         } ${submitted ? "cursor-default" : ""}`}
                         style={{ fontFamily: "var(--font-serif)" }}
                       >
@@ -244,7 +244,7 @@ export default function ExercisesModule({ exercises, s }: ExercisesModuleProps) 
             setSubmitted(false);
             setScore(null);
           }}
-          className="mt-6 px-8 py-3 bg-white text-[#666] rounded-[10px] text-[14px] font-bold border border-[#ccc] cursor-pointer hover:border-[#666] hover:text-[#333] transition-colors"
+          className="mt-6 px-8 py-3 bg-white text-[#000] rounded-[10px] text-[14px] font-bold border border-[#ccc] cursor-pointer hover:border-[#666] hover:text-[#333] transition-colors"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           重新作答

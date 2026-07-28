@@ -41,7 +41,7 @@ export default function FilterPanel({ filter, onChange }: FilterPanelProps) {
       <div className="flex items-center justify-between mb-3">
         <button
           onClick={() => setOpen(!open)}
-          className="flex items-center gap-2 text-[13px] text-[#666] hover:text-[#333] transition-colors font-bold cursor-pointer bg-transparent border-none"
+          className="flex items-center gap-2 text-[13px] text-[#000] hover:text-[#333] transition-colors font-bold cursor-pointer bg-transparent border-none"
           style={{ fontFamily: "var(--font-serif)" }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -51,7 +51,7 @@ export default function FilterPanel({ filter, onChange }: FilterPanelProps) {
           {open ? " ▲" : " ▼"}
         </button>
         <div className="flex items-center gap-2">
-          <span className="text-[12px] text-[#999]" style={{ fontFamily: "var(--font-serif)" }}>
+          <span className="text-[12px] text-[#000]" style={{ fontFamily: "var(--font-serif)" }}>
             {s.courses_sort}:
           </span>
           <select
@@ -82,7 +82,7 @@ export default function FilterPanel({ filter, onChange }: FilterPanelProps) {
             <div className="flex flex-wrap items-center gap-6 p-5 bg-[#f7f7f7] rounded-[12px] border border-[#eee] mb-2">
               {/* Category */}
               <div className="flex items-center gap-2">
-                <span className="text-[12px] text-[#999] flex-shrink-0" style={{ fontFamily: "var(--font-serif)" }}>
+                <span className="text-[12px] text-[#000] flex-shrink-0" style={{ fontFamily: "var(--font-serif)" }}>
                   {s.courses_category}:
                 </span>
                 <select
@@ -100,7 +100,7 @@ export default function FilterPanel({ filter, onChange }: FilterPanelProps) {
 
               {/* Difficulty */}
               <div className="flex items-center gap-2">
-                <span className="text-[12px] text-[#999] flex-shrink-0" style={{ fontFamily: "var(--font-serif)" }}>
+                <span className="text-[12px] text-[#000] flex-shrink-0" style={{ fontFamily: "var(--font-serif)" }}>
                   {s.courses_difficulty}:
                 </span>
                 <select
@@ -118,7 +118,7 @@ export default function FilterPanel({ filter, onChange }: FilterPanelProps) {
 
               {/* Status */}
               <div className="flex items-center gap-2">
-                <span className="text-[12px] text-[#999] flex-shrink-0" style={{ fontFamily: "var(--font-serif)" }}>
+                <span className="text-[12px] text-[#000] flex-shrink-0" style={{ fontFamily: "var(--font-serif)" }}>
                   {s.courses_status}:
                 </span>
                 <select

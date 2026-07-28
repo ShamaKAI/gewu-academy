@@ -160,12 +160,12 @@ export default function PptModule({ pptFiles, s }: PptModuleProps) {
 
       <input ref={fileInputRef} type="file" accept=".pdf,.ppt,.pptx,.html,.htm" onChange={handleFileChange} className="hidden" />
 
-      <button onClick={handleUpload} className="mb-5 px-5 py-2.5 border border-dashed border-[#ccc] rounded-[10px] text-[13px] cursor-pointer hover:border-[#999] hover:text-[#333] transition-colors" style={{ fontFamily: "var(--font-serif)", color: "#666", background: "#fafafa" }}>
+      <button onClick={handleUpload} className="mb-5 px-5 py-2.5 border border-dashed border-[#ccc] rounded-[10px] text-[13px] cursor-pointer hover:border-[#999] hover:text-[#333] transition-colors" style={{ fontFamily: "var(--font-serif)", color: "#000", background: "#fafafa" }}>
         <MixedFont text={`+ ${s.upload_ppt}（PDF, PPT, PPTX, HTML）`} />
       </button>
 
       {allFiles.length === 0 ? (
-        <p className="text-[#999] text-[14px] py-8" style={{ fontFamily: "var(--font-serif)" }}>暂无课件，请上传</p>
+        <p className="text-[#000] text-[14px] py-8" style={{ fontFamily: "var(--font-serif)" }}>暂无课件，请上传</p>
       ) : (
         <div>
           <div className="flex gap-2 mb-4 flex-wrap">
@@ -174,7 +174,7 @@ export default function PptModule({ pptFiles, s }: PptModuleProps) {
               return (
                 <div key={f.id} className="flex items-center gap-1">
                   <button onClick={() => setActiveFile(f)}
-                    className={`px-4 py-2 rounded-[8px] text-[13px] border cursor-pointer transition-colors ${activeFile?.id === f.id ? "bg-[#333] text-white border-[#333]" : "bg-white text-[#666] border-[#ccc] hover:border-[#666]"}`}
+                    className={`px-4 py-2 rounded-[8px] text-[13px] border cursor-pointer transition-colors ${activeFile?.id === f.id ? "bg-[#333] text-white border-[#333]" : "bg-white text-[#000] border-[#ccc] hover:border-[#666]"}`}
                     style={{ fontFamily: "var(--font-serif)" }}><MixedFont text={f.title} /></button>
                   {isUser && <button onClick={() => deleteUserFile(f.id)} className="w-5 h-5 rounded-full bg-[#fee] text-[#C04040] text-[12px] border-none cursor-pointer hover:bg-[#fcc] flex items-center justify-center">×</button>}
                 </div>
@@ -188,16 +188,16 @@ export default function PptModule({ pptFiles, s }: PptModuleProps) {
               <div className="flex items-center gap-3 p-3 bg-[#f7f7f7] border-b border-[#eee] flex-wrap">
                 {(["pen","rect","circle","arrow","eraser"] as ToolType[]).map((t) => (
                   <button key={t} onClick={() => setTool(t)}
-                    className={`px-2.5 py-1.5 rounded-[6px] text-[12px] border cursor-pointer transition-colors ${tool===t ? "bg-[#e0e0e0] text-[#333] border-[#999]" : "bg-white text-[#666] border-[#ccc] hover:border-[#666]"}`}
+                    className={`px-2.5 py-1.5 rounded-[6px] text-[12px] border cursor-pointer transition-colors ${tool===t ? "bg-[#e0e0e0] text-[#333] border-[#999]" : "bg-white text-[#000] border-[#ccc] hover:border-[#666]"}`}
                     style={{ fontFamily: "var(--font-serif)" }}>{s[`annotation_${t}`]}</button>
                 ))}
                 <span className="text-[#ccc]">|</span>
-                <span className="text-[12px] text-[#999]" style={{ fontFamily: "var(--font-serif)" }}>{s.annotation_color}:</span>
+                <span className="text-[12px] text-[#000]" style={{ fontFamily: "var(--font-serif)" }}>{s.annotation_color}:</span>
                 {COLORS.map((c) => <button key={c} onClick={() => setColor(c)} className="w-5 h-5 rounded-full border-2 cursor-pointer hover:scale-110" style={{ backgroundColor: c, borderColor: color===c?"#333":"#e0e0e0" }} />)}
                 <span className="text-[#ccc]">|</span>
-                <span className="text-[12px] text-[#999]" style={{ fontFamily: "var(--font-serif)" }}>{s.annotation_size}:</span>
+                <span className="text-[12px] text-[#000]" style={{ fontFamily: "var(--font-serif)" }}>{s.annotation_size}:</span>
                 {SIZES.map((sz) => <button key={sz} onClick={() => setStrokeWidth(sz)}
-                  className={`px-2 py-1 rounded-[6px] text-[11px] border cursor-pointer transition-colors ${strokeWidth===sz?"bg-[#e0e0e0] text-[#333] border-[#999]":"bg-white text-[#666] border-[#ccc] hover:border-[#666]"}`}
+                  className={`px-2 py-1 rounded-[6px] text-[11px] border cursor-pointer transition-colors ${strokeWidth===sz?"bg-[#e0e0e0] text-[#333] border-[#999]":"bg-white text-[#000] border-[#ccc] hover:border-[#666]"}`}
                   style={{ fontFamily: "var(--font-display)" }}>{sz}px</button>)}
                 <span className="text-[#ccc]">|</span>
                 <button onClick={clearAnnotations} className="px-2.5 py-1.5 rounded-[6px] text-[12px] bg-[#fef2f2] text-[#C04040] border border-[#fecaca] cursor-pointer hover:bg-[#fee2e2]" style={{ fontFamily: "var(--font-serif)" }}>{s.annotation_clear}</button>

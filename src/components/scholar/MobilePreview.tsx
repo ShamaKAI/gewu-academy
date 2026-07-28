@@ -54,9 +54,9 @@ export default function MobilePreview() {
               style={{ fontFamily: "var(--font-serif)" }}>张</div>
             <div>
               <p className="text-[14px] text-[#000] font-bold m-0" style={{ fontFamily: "var(--font-serif)" }}>{s.student_name}</p>
-              <p className="text-[11px] text-[#999] m-0" style={{ fontFamily: "var(--font-display)" }}>{s.student_id}</p>
+              <p className="text-[11px] text-[#000] m-0" style={{ fontFamily: "var(--font-display)" }}>{s.student_id}</p>
             </div>
-            <span className="ml-auto text-[11px] text-[#666] font-bold" style={{ fontFamily: "var(--font-serif)" }}>学子</span>
+            <span className="ml-auto text-[11px] text-[#000] font-bold" style={{ fontFamily: "var(--font-serif)" }}>学子</span>
           </div>
 
           {/* 3 stat labels */}
@@ -68,7 +68,7 @@ export default function MobilePreview() {
             ].map((st) => (
               <div key={st.label} className="flex-1 text-center bg-white rounded-[8px] py-2">
                 <p className="text-[16px] text-[#000] font-bold m-0 leading-none" style={{ fontFamily: "var(--font-display)" }}>{st.val}</p>
-                <p className="text-[10px] text-[#999] m-0 mt-0.5" style={{ fontFamily: "var(--font-serif)" }}>{st.label}</p>
+                <p className="text-[10px] text-[#000] m-0 mt-0.5" style={{ fontFamily: "var(--font-serif)" }}>{st.label}</p>
               </div>
             ))}
           </div>
@@ -88,7 +88,7 @@ export default function MobilePreview() {
                   <div className="flex-1 h-[4px] bg-[#eee] rounded-full">
                     <div className="h-full bg-[#333] rounded-full" style={{ width: `${co.progress}%` }} />
                   </div>
-                  <span className="text-[9px] text-[#999]" style={{ fontFamily: "var(--font-display)" }}>{co.progress}%</span>
+                  <span className="text-[9px] text-[#000]" style={{ fontFamily: "var(--font-display)" }}>{co.progress}%</span>
                 </div>
               </div>
             </div>
@@ -101,14 +101,14 @@ export default function MobilePreview() {
             const active = key === "academy";
             return (
               <div key={key} className="flex flex-col items-center gap-0.5 cursor-pointer">
-                <span className={active ? "text-[#000]" : "text-[#999]"}><Icon /></span>
-                <span className={`text-[9px] ${active ? "text-[#000] font-bold" : "text-[#999]"}`} style={{ fontFamily: "var(--font-serif)" }}>{label}</span>
+                <span className={active ? "text-[#000]" : "text-[#000]"}><Icon /></span>
+                <span className={`text-[9px] ${active ? "text-[#000] font-bold" : "text-[#000]"}`} style={{ fontFamily: "var(--font-serif)" }}>{label}</span>
               </div>
             );
           })}
         </div>
       </div>
-      <p className="text-[11px] text-[#999] mt-2" style={{ fontFamily: "var(--font-serif)" }}>移动端预览</p>
+      <p className="text-[11px] text-[#000] mt-2" style={{ fontFamily: "var(--font-serif)" }}>移动端预览</p>
     </div>
   );
 }

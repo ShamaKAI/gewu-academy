@@ -108,7 +108,7 @@ export default function CourseCard({
           {title}
         </h4>
         <p
-          className={`text-[11px] text-[#999] m-0 mb-0.5`}
+          className={`text-[11px] text-[#000] m-0 mb-0.5`}
           style={{ fontFamily: "var(--font-serif)" }}
         >
           {category}
@@ -120,7 +120,7 @@ export default function CourseCard({
             <StarRating rating={rating} />
             {showMentor && mentor && (
               <span
-                className="text-[11px] text-[#999]"
+                className="text-[11px] text-[#000]"
                 style={{ fontFamily: "var(--font-serif)" }}
               >
                 {mentor}
@@ -139,7 +139,7 @@ export default function CourseCard({
               />
             </div>
             <span
-              className="text-[10px] text-[#999] flex-shrink-0"
+              className="text-[10px] text-[#000] flex-shrink-0"
               style={{ fontFamily: "var(--font-display)" }}
             >
               {progress}%

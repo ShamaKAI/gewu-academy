@@ -29,7 +29,7 @@ export default function CourseDetailPage() {
   };
 
   if (!course) {
-    return <div className="flex items-center justify-center h-full"><p className="text-[#999] text-[16px]" style={{ fontFamily: "var(--font-serif)" }}>课程不存在</p></div>;
+    return <div className="flex items-center justify-center h-full"><p className="text-[#000] text-[16px]" style={{ fontFamily: "var(--font-serif)" }}>课程不存在</p></div>;
   }
 
   return (
@@ -41,13 +41,13 @@ export default function CourseDetailPage() {
           <span className="text-[15px] text-[#000] font-bold pointer-events-none" style={{ fontFamily: "var(--font-serif)" }}>
             {s.knowledge_tree}
           </span>
-          <span className="text-[12px] text-[#999] pointer-events-none" style={{ fontFamily: "var(--font-serif)" }}>
+          <span className="text-[12px] text-[#000] pointer-events-none" style={{ fontFamily: "var(--font-serif)" }}>
             — {course.title}
           </span>
         </div>
         {/* Collapse button — bottom right, never under lang switch */}
         <button onClick={() => setTreeVisible(false)}
-          className="absolute bottom-4 right-5 z-10 text-[12px] text-[#999] hover:text-[#333] transition-colors bg-white/80 backdrop-blur-sm border border-[#ddd] rounded-[8px] px-3 py-1.5 cursor-pointer"
+          className="absolute bottom-4 right-5 z-10 text-[12px] text-[#000] hover:text-[#333] transition-colors bg-white/80 backdrop-blur-sm border border-[#ddd] rounded-[8px] px-3 py-1.5 cursor-pointer"
           style={{ fontFamily: "var(--font-serif)" }}>{s.collapse_tree} ▲</button>
 
         <div className="w-full h-full">
@@ -57,7 +57,7 @@ export default function CourseDetailPage() {
 
       {/* Expand toggle */}
       {!treeVisible && (
-        <button onClick={() => setTreeVisible(true)} className="w-full py-2.5 bg-[#fafafa] border-b border-[#eee] text-[12px] text-[#666] hover:text-[#333] transition-colors cursor-pointer" style={{ fontFamily: "var(--font-serif)" }}>{s.expand_tree} ▼</button>
+        <button onClick={() => setTreeVisible(true)} className="w-full py-2.5 bg-[#fafafa] border-b border-[#eee] text-[12px] text-[#000] hover:text-[#333] transition-colors cursor-pointer" style={{ fontFamily: "var(--font-serif)" }}>{s.expand_tree} ▼</button>
       )}
 
       {/* ====== Bottom: Course header + TOC ====== */}
@@ -67,7 +67,7 @@ export default function CourseDetailPage() {
             <img src={course.coverImage} alt={course.title} className="w-14 h-14 rounded-[8px] object-cover" />
             <div>
               <h1 className="text-[24px] text-[#000] font-bold m-0 tracking-[calc(var(--ls-scale)*2px)]" style={{ fontFamily: "var(--font-serif)" }}>{course.title}</h1>
-              <p className="text-[13px] text-[#999] m-0 mt-0.5" style={{ fontFamily: "var(--font-serif)" }}>{course.instructor} · {course.category} · {course.duration}</p>
+              <p className="text-[13px] text-[#000] m-0 mt-0.5" style={{ fontFamily: "var(--font-serif)" }}>{course.instructor} · {course.category} · {course.duration}</p>
             </div>
           </div>
         </div>

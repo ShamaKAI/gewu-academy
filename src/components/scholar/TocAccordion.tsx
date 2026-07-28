@@ -26,7 +26,7 @@ export default function TocAccordion({ chapters, courseId, locale, activeSection
 
   if (chapters.length === 0) {
     return (
-      <p className="text-center text-[#999] py-12 text-[13px]" style={{ fontFamily: "var(--font-serif)" }}>
+      <p className="text-center text-[#000] py-12 text-[13px]" style={{ fontFamily: "var(--font-serif)" }}>
         暂无课程目录
       </p>
     );
@@ -47,7 +47,7 @@ export default function TocAccordion({ chapters, courseId, locale, activeSection
                 {ch.title}
               </span>
               <motion.span
-                className="text-[#999] text-[16px]"
+                className="text-[#000] text-[16px]"
                 animate={{ rotate: isOpen ? 180 : 0 }}
                 transition={{ duration: 0.2 }}
               >
@@ -73,7 +73,7 @@ export default function TocAccordion({ chapters, courseId, locale, activeSection
                         className={`block px-10 py-2.5 text-[14px] no-underline transition-colors ${
                           activeSection === sec.slug
                             ? "text-[#000] font-bold bg-[#f0f0f0] border-l-[3px] border-[#333]"
-                            : "text-[#666] hover:text-[#333] hover:bg-[#f9f9f9] border-l-[3px] border-transparent"
+                            : "text-[#000] hover:text-[#333] hover:bg-[#f9f9f9] border-l-[3px] border-transparent"
                         }`}
                         style={{ fontFamily: "var(--font-serif)" }}
                       >

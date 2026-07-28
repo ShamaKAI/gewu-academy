@@ -22,9 +22,9 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 const STATUS_MAP = {
-  not_started: { color: "#999", bg: "#eee" },
+  not_started: { color: "#000", bg: "#eee" },
   in_progress: { color: "#C5A46D", bg: "#faf5eb" },
-  completed: { color: "#666", bg: "#e8e8e8" },
+  completed: { color: "#000", bg: "#e8e8e8" },
 } as const;
 
 export default function CourseListCard({ course, locale }: { course: Course; locale: string }) {
@@ -63,11 +63,11 @@ export default function CourseListCard({ course, locale }: { course: Course; loc
                 </span>
               )}
             </div>
-            <p className="text-[12px] text-[#666] m-0 mb-1 leading-relaxed line-clamp-2" style={{ fontFamily: "var(--font-serif)" }}>
+            <p className="text-[12px] text-[#000] m-0 mb-1 leading-relaxed line-clamp-2" style={{ fontFamily: "var(--font-serif)" }}>
               {course.description}
             </p>
           </div>
-          <div className="flex items-center gap-4 text-[12px] text-[#999]" style={{ fontFamily: "var(--font-serif)" }}>
+          <div className="flex items-center gap-4 text-[12px] text-[#000]" style={{ fontFamily: "var(--font-serif)" }}>
             <span>{course.instructor}</span>
             <span>·</span>
             <span>{course.category}</span>
@@ -75,7 +75,7 @@ export default function CourseListCard({ course, locale }: { course: Course; loc
             <span>{course.duration}</span>
             <span>·</span>
             <StarRating rating={course.rating} />
-            <span className="text-[#999]">({course.reviewCount})</span>
+            <span className="text-[#000]">({course.reviewCount})</span>
           </div>
         </div>
       </motion.div>

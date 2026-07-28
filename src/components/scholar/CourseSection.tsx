@@ -58,7 +58,7 @@ export default function CourseSection({
           {title}
         </h2>
         <span
-          className="text-[13px] text-[#999] cursor-pointer hover:text-[#333] hover:underline transition-colors font-bold"
+          className="text-[13px] text-[#000] cursor-pointer hover:text-[#333] hover:underline transition-colors font-bold"
           style={{ fontFamily: "var(--font-serif)" }}
           onClick={onMore}
         >

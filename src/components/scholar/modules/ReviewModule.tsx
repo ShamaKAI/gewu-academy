@@ -72,7 +72,7 @@ export default function ReviewModule({ reviews, s }: ReviewModuleProps) {
             disabled={myRating === 0}
             className={`px-5 py-2 rounded-[8px] text-[13px] font-bold border-none cursor-pointer transition-colors ${
               myRating === 0
-                ? "bg-[#e0e0e0] text-[#999] cursor-not-allowed"
+                ? "bg-[#e0e0e0] text-[#000] cursor-not-allowed"
                 : "bg-[#333] text-white hover:bg-[#555]"
             }`}
             style={{ fontFamily: "var(--font-serif)" }}
@@ -80,7 +80,7 @@ export default function ReviewModule({ reviews, s }: ReviewModuleProps) {
             {s.submit_review}
           </button>
         ) : (
-          <p className="text-[13px] text-[#666] m-0" style={{ fontFamily: "var(--font-serif)" }}>
+          <p className="text-[13px] text-[#000] m-0" style={{ fontFamily: "var(--font-serif)" }}>
             评分已提交 ✓
           </p>
         )}
@@ -104,7 +104,7 @@ export default function ReviewModule({ reviews, s }: ReviewModuleProps) {
           disabled={!commentText.trim()}
           className={`mt-3 px-5 py-2 rounded-[8px] text-[13px] font-bold border-none cursor-pointer transition-colors ${
             !commentText.trim()
-              ? "bg-[#e0e0e0] text-[#999] cursor-not-allowed"
+              ? "bg-[#e0e0e0] text-[#000] cursor-not-allowed"
               : "bg-[#333] text-white hover:bg-[#555]"
           }`}
           style={{ fontFamily: "var(--font-serif)" }}
@@ -119,7 +119,7 @@ export default function ReviewModule({ reviews, s }: ReviewModuleProps) {
           {s.reviews_existing} ({allReviews.length})
         </p>
         {allReviews.length === 0 ? (
-          <p className="text-[13px] text-[#999]" style={{ fontFamily: "var(--font-serif)" }}>
+          <p className="text-[13px] text-[#000]" style={{ fontFamily: "var(--font-serif)" }}>
             暂无评价
           </p>
         ) : (
@@ -137,11 +137,11 @@ export default function ReviewModule({ reviews, s }: ReviewModuleProps) {
                       </span>
                     ))}
                   </span>
-                  <span className="text-[11px] text-[#999] ml-auto" style={{ fontFamily: "var(--font-display)" }}>
+                  <span className="text-[11px] text-[#000] ml-auto" style={{ fontFamily: "var(--font-display)" }}>
                     {rv.date}
                   </span>
                 </div>
-                <p className="text-[13px] text-[#666] m-0 leading-relaxed" style={{ fontFamily: "var(--font-serif)" }}>
+                <p className="text-[13px] text-[#000] m-0 leading-relaxed" style={{ fontFamily: "var(--font-serif)" }}>
                   {rv.comment}
                 </p>
               </div>

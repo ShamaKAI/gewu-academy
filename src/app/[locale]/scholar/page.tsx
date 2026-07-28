@@ -64,10 +64,10 @@ function DataStatCard({ icon, value, label, sub }: { icon: React.ReactNode; valu
     <motion.div className="bg-[#f7f7f7] rounded-[12px] p-5 cursor-pointer"
       whileHover={{ y: -2, boxShadow: "0 1px 6px rgba(0,0,0,0.05)", transition: { duration: 0.2 } }}
       style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.03)" }}>
-      <div className="text-[#666] mb-3">{icon}</div>
+      <div className="text-[#000] mb-3">{icon}</div>
       <p className="text-[28px] text-[#000] font-bold m-0 leading-none" style={{ fontFamily: "var(--font-display)" }}>{value}</p>
       <p className="text-[13px] text-[#333] font-bold m-0 mt-1" style={{ fontFamily: "var(--font-serif)" }}>{label}</p>
-      <p className="text-[11px] text-[#999] m-0 mt-0.5" style={{ fontFamily: "var(--font-serif)" }}>{sub}</p>
+      <p className="text-[11px] text-[#000] m-0 mt-0.5" style={{ fontFamily: "var(--font-serif)" }}>{sub}</p>
     </motion.div>
   );
 }
@@ -78,11 +78,11 @@ function ActivityCard({ date, month, title, time, location, speaker }: { date: s
       whileHover={{ y: -2, borderColor: "#ccc", boxShadow: "0 1px 6px rgba(0,0,0,0.05)", transition: { duration: 0.2 } }}>
       <div className="w-12 h-12 bg-[#f7f7f7] rounded-[10px] flex flex-col items-center justify-center flex-shrink-0 border border-[#eee]">
         <span className="text-[18px] text-[#000] font-bold leading-none" style={{ fontFamily: "var(--font-display)" }}>{date}</span>
-        <span className="text-[10px] text-[#999] mt-0.5 font-bold" style={{ fontFamily: "var(--font-serif)" }}>{month}</span>
+        <span className="text-[10px] text-[#000] mt-0.5 font-bold" style={{ fontFamily: "var(--font-serif)" }}>{month}</span>
       </div>
       <div className="flex-1">
         <h4 className="text-[14px] text-[#333] font-bold m-0 mb-1" style={{ fontFamily: "var(--font-serif)" }}>{title}</h4>
-        <p className="text-[12px] text-[#666] m-0 leading-relaxed" style={{ fontFamily: "var(--font-serif)" }}>{time} | {location} | {speaker}</p>
+        <p className="text-[12px] text-[#000] m-0 leading-relaxed" style={{ fontFamily: "var(--font-serif)" }}>{time} | {location} | {speaker}</p>
       </div>
       <span className="text-[#ccc] self-center"><IconArrowRight /></span>
     </motion.div>
@@ -131,16 +131,16 @@ export default function ScholarHome() {
         <div>
           <h1 className="text-[28px] text-[#000] tracking-[calc(var(--ls-scale)*3px)] font-bold m-0 leading-tight" style={{ fontFamily: "var(--font-serif)" }}>
             {s.hero_greeting.replace("{name}", "")}
-            <span style={{ fontFamily: "var(--font-display)" }}>{username}</span>
+            <span style={{ fontFamily: "'Times New Roman', serif" }}>{username}</span>
           </h1>
-          <p className="text-[14px] text-[#666] m-0 mt-1.5" style={{ fontFamily: "var(--font-serif)" }}>{s.hero_subtitle}</p>
+          <p className="text-[14px] text-[#000] m-0 mt-1.5" style={{ fontFamily: "var(--font-serif)" }}>{s.hero_subtitle}</p>
         </div>
         <div className="flex items-center gap-4 mt-1">
-          <span className="text-[#666] cursor-pointer hover:text-[#333] transition-colors"><IconBell /></span>
-          <span className="text-[#666] cursor-pointer hover:text-[#333] transition-colors"><IconMail /></span>
+          <span className="text-[#000] cursor-pointer hover:text-[#333] transition-colors"><IconBell /></span>
+          <span className="text-[#000] cursor-pointer hover:text-[#333] transition-colors"><IconMail /></span>
           <div className="flex items-center gap-2 cursor-pointer hover:opacity-80">
-            <div className="w-8 h-8 rounded-full bg-[#ddd] flex items-center justify-center text-[12px] text-[#333] font-bold" style={{ fontFamily: "var(--font-serif)" }}>{username[0]}</div>
-            <span className="text-[13px] text-[#333] font-bold" style={{ fontFamily: "var(--font-serif)" }}>{username}</span>
+            <div className="w-8 h-8 rounded-full bg-[#ddd] flex items-center justify-center text-[12px] text-[#333] font-bold" style={{ fontFamily: "'Times New Roman', serif" }}>{username[0]}</div>
+            <span className="text-[13px] text-[#000] font-bold" style={{ fontFamily: "'Times New Roman', serif" }}>{username}</span>
           </div>
         </div>
       </div>
@@ -157,7 +157,7 @@ export default function ScholarHome() {
           className="w-full h-[46px] pl-5 pr-12 border border-[#cccccc] rounded-[12px] text-[14px] text-[#333] outline-none bg-white transition-colors focus:border-[#666]"
           style={{ fontFamily: "var(--font-serif)" }}
         />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#999] cursor-pointer"><IconSearch /></span>
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#000] cursor-pointer"><IconSearch /></span>
 
         {/* Search results dropdown */}
         <AnimatePresence>
@@ -188,11 +188,11 @@ export default function ScholarHome() {
                     <p className="text-[14px] text-[#333] font-bold m-0 truncate" style={{ fontFamily: "var(--font-serif)" }}>
                       {course.title}
                     </p>
-                    <p className="text-[11px] text-[#999] m-0" style={{ fontFamily: "var(--font-serif)" }}>
+                    <p className="text-[11px] text-[#000] m-0" style={{ fontFamily: "var(--font-serif)" }}>
                       {course.instructor} · {course.category} · ★{course.rating}
                     </p>
                   </div>
-                  <span className="text-[11px] text-[#999] flex-shrink-0" style={{ fontFamily: "var(--font-display)" }}>
+                  <span className="text-[11px] text-[#000] flex-shrink-0" style={{ fontFamily: "var(--font-display)" }}>
                     {course.duration}
                   </span>
                 </button>
@@ -204,7 +204,7 @@ export default function ScholarHome() {
         {/* No results */}
         {search.trim() && searchResults.length === 0 && (
           <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-[12px] border border-[#ddd] shadow-lg z-50 p-5 text-center">
-            <p className="text-[13px] text-[#999] m-0" style={{ fontFamily: "var(--font-serif)" }}>
+            <p className="text-[13px] text-[#000] m-0" style={{ fontFamily: "var(--font-serif)" }}>
               未找到相关课程
             </p>
           </div>
@@ -232,7 +232,7 @@ export default function ScholarHome() {
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[18px] text-[#000] font-bold m-0 tracking-[calc(var(--ls-scale)*2px)]" style={{ fontFamily: "var(--font-serif)" }}>{s.activity_title}</h2>
-          <span className="text-[13px] text-[#999] cursor-pointer hover:text-[#333] hover:underline transition-colors font-bold" style={{ fontFamily: "var(--font-serif)" }}>{s.activity_more} →</span>
+          <span className="text-[13px] text-[#000] cursor-pointer hover:text-[#333] hover:underline transition-colors font-bold" style={{ fontFamily: "var(--font-serif)" }}>{s.activity_more} →</span>
         </div>
         <div className="flex flex-col gap-3">
           {activities.map((a) => <ActivityCard key={a.title} date={a.date} month={a.month} title={a.title} time={a.time} location={a.location} speaker={a.speaker} />)}
