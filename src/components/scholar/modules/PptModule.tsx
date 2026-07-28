@@ -16,6 +16,7 @@ export default function PptModule({ pptFiles, s }: PptModuleProps) {
   const [activeFile, setActiveFile] = useState<PptFile | null>(
     pptFiles.length > 0 ? pptFiles[0] : null
   );
+  const [userFiles, setUserFiles] = useState<PptFile[]>([]);
   const [previewMode, setPreviewMode] = useState(false);
   const [tool, setTool] = useState<ToolType>("pen");
   const [color, setColor] = useState("#000000");
@@ -25,15 +26,49 @@ export default function PptModule({ pptFiles, s }: PptModuleProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fabricCanvasRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  // Drag-to-draw state
+  const isDrawing = useRef(false);
+  const drawStart = useRef<{ x: number; y: number } | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const currentShape = useRef<any>(null);
 
-  // Compute canvas dimensions
+  const allFiles = [...pptFiles, ...userFiles];
+
+  /* ---- Upload ---- */
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    Array.from(files).forEach((file) => {
+      const url = URL.createObjectURL(file);
+      const ext = file.name.split(".").pop()?.toLowerCase() || "pdf";
+      const type = ext === "pdf" ? "pdf" : ext === "html" ? "html" : ext === "ppt" ? "ppt" : ext === "pptx" ? "pptx" : "pdf";
+      const newFile: PptFile = {
+        id: `uploaded-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        title: file.name,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        type: type as any,
+        src: url,
+      };
+      setUserFiles((prev) => [...prev, newFile]);
+      setActiveFile(newFile);
+      setPreviewMode(false);
+    });
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  /* ---- Canvas helpers ---- */
   const getCanvasDims = useCallback(() => {
     const w = containerRef.current?.clientWidth || 800;
     const h = Math.max(600, w * 0.75);
     return { width: w, height: h };
   }, []);
 
-  // Initialize / reinitialize fabric canvas when entering preview mode
+  /* ---- Init fabric canvas ---- */
   useEffect(() => {
     if (!previewMode || !canvasRef.current) return;
 
@@ -44,29 +79,107 @@ export default function PptModule({ pptFiles, s }: PptModuleProps) {
     const initFabric = async () => {
       try {
         const fabricModule = await import("fabric");
-        // fabric v7.4.0 uses named exports
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { Canvas, PencilBrush } = fabricModule as any;
 
         if (cancelled || !canvasRef.current) return;
-
         const { width, height } = getCanvasDims();
 
         fc = new Canvas(canvasRef.current, {
-          isDrawingMode: tool === "pen",
+          isDrawingMode: false,
           width,
           height,
-          selection: true,
+          selection: false,
           backgroundColor: "transparent",
         });
 
         fabricCanvasRef.current = fc;
 
-        if (tool === "pen") {
+        // ---- MOUSE EVENTS for drag-to-draw shapes ----
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        fc.on("mouse:down", (opt: any) => {
+          const pointer = fc.getPointer(opt.e);
+          if (tool === "pen" || tool === "eraser") return; // handled by freeDrawing
+
+          isDrawing.current = true;
+          drawStart.current = { x: pointer.x, y: pointer.y };
+
+          const common = {
+            left: pointer.x,
+            top: pointer.y,
+            stroke: color,
+            strokeWidth,
+            fill: "transparent",
+            selectable: false,
+            evented: false,
+          };
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          let shape: any = null;
+          if (tool === "rect") {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            shape = new (fabricModule as any).Rect({ ...common, width: 0, height: 0 });
+          } else if (tool === "circle") {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            shape = new (fabricModule as any).Circle({ ...common, radius: 0, left: pointer.x, top: pointer.y });
+          } else if (tool === "arrow") {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            shape = new (fabricModule as any).Line([pointer.x, pointer.y, pointer.x, pointer.y], common);
+          }
+
+          if (shape) {
+            currentShape.current = shape;
+            fc.add(shape);
+            fc.renderAll();
+          }
+        });
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        fc.on("mouse:move", (opt: any) => {
+          if (!isDrawing.current || !drawStart.current || !currentShape.current) return;
+
+          const pointer = fc.getPointer(opt.e);
+          const start = drawStart.current;
+          const shape = currentShape.current;
+
+          if (tool === "rect") {
+            const left = Math.min(start.x, pointer.x);
+            const top = Math.min(start.y, pointer.y);
+            const w = Math.abs(pointer.x - start.x);
+            const h = Math.abs(pointer.y - start.y);
+            shape.set({ left, top, width: w, height: h });
+          } else if (tool === "circle") {
+            const dx = pointer.x - start.x;
+            const dy = pointer.y - start.y;
+            const r = Math.sqrt(dx * dx + dy * dy) / 2;
+            shape.set({
+              left: start.x - r,
+              top: start.y - r,
+              radius: r,
+            });
+          } else if (tool === "arrow") {
+            shape.set({ x2: pointer.x, y2: pointer.y });
+          }
+
+          fc.renderAll();
+        });
+
+        fc.on("mouse:up", () => {
+          if (isDrawing.current && currentShape.current) {
+            currentShape.current.set({ selectable: true, evented: true });
+            fc.renderAll();
+          }
+          isDrawing.current = false;
+          drawStart.current = null;
+          currentShape.current = null;
+        });
+
+        // ---- Tool init ----
+        if (tool === "pen" || tool === "eraser") {
           fc.isDrawingMode = true;
           fc.freeDrawingBrush = new PencilBrush(fc);
-          fc.freeDrawingBrush.color = color;
-          fc.freeDrawingBrush.width = strokeWidth;
+          fc.freeDrawingBrush.color = tool === "eraser" ? "#ffffff" : color;
+          fc.freeDrawingBrush.width = tool === "eraser" ? strokeWidth * 3 : strokeWidth;
         }
       } catch (err) {
         console.error("Failed to load fabric:", err);
@@ -82,34 +195,31 @@ export default function PptModule({ pptFiles, s }: PptModuleProps) {
         fabricCanvasRef.current = null;
       }
     };
-    // We intentionally re-init only when previewMode changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [previewMode]);
 
-  // Update drawing mode and brush when tool / color / strokeWidth changes
+  /* ---- Update brush when tool/color/width changes ---- */
   useEffect(() => {
     const fc = fabricCanvasRef.current;
     if (!fc) return;
 
     if (tool === "pen") {
       fc.isDrawingMode = true;
-      fc.freeDrawingBrush.color = color;
-      fc.freeDrawingBrush.width = strokeWidth;
+      fc.selection = false;
+      if (fc.freeDrawingBrush) {
+        fc.freeDrawingBrush.color = color;
+        fc.freeDrawingBrush.width = strokeWidth;
+      }
     } else if (tool === "eraser") {
       fc.isDrawingMode = true;
-      fc.freeDrawingBrush.color = "transparent";
-      // Eraser is drawn as transparent "pen" strokes; really erasing objects happens
-      // on click — for simplicity, the eraser works by setting the canvas background
-      // color as the stroke, which visually mimics erasing on a white bg.
-      // A proper eraser would use destination-out compositing, but we keep it
-      // simple: we set the brush color to white (#fff) so it appears to erase
-      // on the transparent canvas. Since the canvas is over a white page
-      // background, this looks like erasing.
+      fc.selection = false;
       if (fc.freeDrawingBrush) {
-        fc.freeDrawingBrush.width = strokeWidth * 2;
+        fc.freeDrawingBrush.color = "#ffffff";
+        fc.freeDrawingBrush.width = strokeWidth * 3;
       }
     } else {
       fc.isDrawingMode = false;
+      fc.selection = false;
     }
   }, [tool, color, strokeWidth]);
 
@@ -121,67 +231,6 @@ export default function PptModule({ pptFiles, s }: PptModuleProps) {
     }
   }, []);
 
-  // Handle tool selection: pen/eraser just set the tool; shape tools place a shape immediately
-  const handleToolClick = useCallback(
-    (t: ToolType) => {
-      setTool(t);
-      if (t === "rect" || t === "circle" || t === "arrow") {
-        // Use a microtask to let React batch the setTool + then addShape
-        // We pass the shapes via dynamic import directly
-        const fc = fabricCanvasRef.current;
-        if (!fc) {
-          // Canvas not ready yet — just set the tool
-          return;
-        }
-
-        const { width, height } = getCanvasDims();
-        const cx = width / 2;
-        const cy = height / 2;
-
-        const common = {
-          left: cx - 75,
-          top: cy - 60,
-          stroke: color,
-          strokeWidth,
-          fill: "transparent",
-          selectable: true,
-        };
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        import("fabric").then((mod: any) => {
-          const { Rect, Circle, Line } = mod;
-          const fc = fabricCanvasRef.current;
-          if (!fc) return;
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          let shape: any;
-          switch (t) {
-            case "rect":
-              shape = new Rect({ ...common, width: 150, height: 100 });
-              break;
-            case "circle":
-              shape = new Circle({ ...common, radius: 60, left: cx - 60, top: cy - 60 });
-              break;
-            case "arrow": {
-              shape = new Line([50, 50, 200, 50], {
-                ...common,
-                left: cx - 100,
-                top: cy,
-              });
-              break;
-            }
-          }
-
-          if (shape && fabricCanvasRef.current) {
-            fabricCanvasRef.current.add(shape);
-            fabricCanvasRef.current.renderAll();
-          }
-        });
-      }
-    },
-    [color, strokeWidth, getCanvasDims]
-  );
-
   return (
     <div>
       <h2
@@ -191,27 +240,33 @@ export default function PptModule({ pptFiles, s }: PptModuleProps) {
         {s.tab_ppt}
       </h2>
 
-      {/* Upload placeholder button */}
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".pdf,.ppt,.pptx,.html,.htm,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/html"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
+      {/* Upload button */}
       <button
-        onClick={() => alert(s.upload_coming_soon || "上传功能即将开放")}
+        onClick={handleUploadClick}
         className="mb-5 px-5 py-2.5 border border-dashed border-[#ccc] rounded-[10px] text-[13px] text-[#666] bg-[#fafafa] cursor-pointer hover:border-[#999] hover:text-[#333] transition-colors"
         style={{ fontFamily: "var(--font-serif)" }}
       >
-        + {s.upload_ppt}（PDF, PPT, PPTX, HTML）
+        + {s.upload_ppt}（支持 PDF, PPT, PPTX, HTML）
       </button>
 
-      {pptFiles.length === 0 ? (
-        <p
-          className="text-[#999] text-[14px] py-8"
-          style={{ fontFamily: "var(--font-serif)" }}
-        >
-          {s.no_ppt_files || "暂无课件，请上传"}
+      {allFiles.length === 0 ? (
+        <p className="text-[#999] text-[14px] py-8" style={{ fontFamily: "var(--font-serif)" }}>
+          暂无课件，请上传
         </p>
       ) : (
         <div>
-          {/* File list switcher */}
+          {/* File list */}
           <div className="flex gap-2 mb-4 flex-wrap">
-            {pptFiles.map((f) => (
+            {allFiles.map((f) => (
               <button
                 key={f.id}
                 onClick={() => {
@@ -235,7 +290,6 @@ export default function PptModule({ pptFiles, s }: PptModuleProps) {
             <div className="border border-[#eee] rounded-[12px] overflow-hidden">
               {/* Toolbar */}
               <div className="flex items-center gap-3 p-3 bg-[#f7f7f7] border-b border-[#eee] flex-wrap">
-                {/* Preview mode toggle */}
                 <button
                   onClick={() => setPreviewMode(!previewMode)}
                   className={`px-3 py-1.5 rounded-[6px] text-[12px] border cursor-pointer transition-colors ${
@@ -245,52 +299,39 @@ export default function PptModule({ pptFiles, s }: PptModuleProps) {
                   }`}
                   style={{ fontFamily: "var(--font-serif)" }}
                 >
-                  {previewMode
-                    ? s.annotation_exit || "退出标注"
-                    : s.annotation_enter || "预览 + 标注"}
+                  {previewMode ? "退出标注" : "预览 + 标注"}
                 </button>
 
                 {previewMode && (
                   <>
                     <span className="text-[#ccc] select-none">|</span>
 
-                    {/* Annotation tools */}
-                    {(["pen", "rect", "circle", "arrow", "eraser"] as ToolType[]).map(
-                      (t) => (
-                        <button
-                          key={t}
-                          onClick={() =>
-                            t === "pen" || t === "eraser"
-                              ? setTool(t)
-                              : handleToolClick(t)
-                          }
-                          className={`px-2.5 py-1.5 rounded-[6px] text-[12px] border cursor-pointer transition-colors ${
-                            tool === t
-                              ? "bg-[#e0e0e0] text-[#333] border-[#999]"
-                              : "bg-white text-[#666] border-[#ccc] hover:border-[#666]"
-                          }`}
-                          style={{ fontFamily: "var(--font-serif)" }}
-                        >
-                          {t === "pen"
-                            ? s.annotation_pen
-                            : t === "rect"
-                            ? s.annotation_rect
-                            : t === "circle"
-                            ? s.annotation_circle
-                            : t === "arrow"
-                            ? s.annotation_arrow
-                            : s.annotation_eraser}
-                        </button>
-                      )
-                    )}
+                    {(["pen", "rect", "circle", "arrow", "eraser"] as ToolType[]).map((t) => (
+                      <button
+                        key={t}
+                        onClick={() => setTool(t)}
+                        className={`px-2.5 py-1.5 rounded-[6px] text-[12px] border cursor-pointer transition-colors ${
+                          tool === t
+                            ? "bg-[#e0e0e0] text-[#333] border-[#999]"
+                            : "bg-white text-[#666] border-[#ccc] hover:border-[#666]"
+                        }`}
+                        style={{ fontFamily: "var(--font-serif)" }}
+                      >
+                        {t === "pen"
+                          ? s.annotation_pen
+                          : t === "rect"
+                          ? s.annotation_rect
+                          : t === "circle"
+                          ? s.annotation_circle
+                          : t === "arrow"
+                          ? s.annotation_arrow
+                          : s.annotation_eraser}
+                      </button>
+                    ))}
 
                     <span className="text-[#ccc] select-none">|</span>
 
-                    {/* Color swatches */}
-                    <span
-                      className="text-[12px] text-[#999]"
-                      style={{ fontFamily: "var(--font-serif)" }}
-                    >
+                    <span className="text-[12px] text-[#999]" style={{ fontFamily: "var(--font-serif)" }}>
                       {s.annotation_color}:
                     </span>
                     {COLORS.map((c) => (
@@ -302,17 +343,12 @@ export default function PptModule({ pptFiles, s }: PptModuleProps) {
                           backgroundColor: c,
                           borderColor: color === c ? "#333" : "#e0e0e0",
                         }}
-                        title={c}
                       />
                     ))}
 
                     <span className="text-[#ccc] select-none">|</span>
 
-                    {/* Stroke width */}
-                    <span
-                      className="text-[12px] text-[#999]"
-                      style={{ fontFamily: "var(--font-serif)" }}
-                    >
+                    <span className="text-[12px] text-[#999]" style={{ fontFamily: "var(--font-serif)" }}>
                       {s.annotation_size}:
                     </span>
                     {SIZES.map((sz) => (
@@ -332,7 +368,6 @@ export default function PptModule({ pptFiles, s }: PptModuleProps) {
 
                     <span className="text-[#ccc] select-none">|</span>
 
-                    {/* Clear all */}
                     <button
                       onClick={clearAnnotations}
                       className="px-2.5 py-1.5 rounded-[6px] text-[12px] bg-[#fef2f2] text-[#C04040] border border-[#fecaca] cursor-pointer hover:bg-[#fee2e2] transition-colors"
@@ -344,12 +379,8 @@ export default function PptModule({ pptFiles, s }: PptModuleProps) {
                 )}
               </div>
 
-              {/* Content area */}
-              <div
-                ref={containerRef}
-                className="relative"
-                style={{ minHeight: 400 }}
-              >
+              {/* Content */}
+              <div ref={containerRef} className="relative" style={{ minHeight: 400 }}>
                 {!previewMode ? (
                   <iframe
                     src={activeFile.src}
@@ -357,8 +388,23 @@ export default function PptModule({ pptFiles, s }: PptModuleProps) {
                     title={activeFile.title}
                   />
                 ) : (
-                  <div className="relative bg-[#fafafa]" style={{ minHeight: 600 }}>
+                  <div className="relative bg-white" style={{ minHeight: 600 }}>
                     <canvas ref={canvasRef} className="block border-none w-full" />
+                    {/* Hint text */}
+                    <p
+                      className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[11px] text-[#999] pointer-events-none"
+                      style={{ fontFamily: "var(--font-serif)" }}
+                    >
+                      {tool === "pen" || tool === "eraser"
+                        ? "按住鼠标自由绘制"
+                        : tool === "rect"
+                        ? "拖拽绘制矩形"
+                        : tool === "circle"
+                        ? "拖拽绘制圆形"
+                        : tool === "arrow"
+                        ? "拖拽绘制箭头"
+                        : ""}
+                    </p>
                   </div>
                 )}
               </div>

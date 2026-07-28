@@ -21,18 +21,15 @@ export default function CourseDetailPage() {
 
   const [treeVisible, setTreeVisible] = useState(true);
 
-  // Flatten all sections for the tree
   const allSections: CourseSection[] = course
     ? course.chapters.flatMap((ch) => ch.sections)
     : [];
 
   const handleNodeClick = (slug: string) => {
-    // Navigate to the section page if it's a section slug
     const isSection = allSections.some((s) => s.slug === slug);
     if (isSection) {
       router.push(`/${locale}/scholar/courses/${courseId}/${slug}`);
     } else {
-      // It's a chapter slug — scroll to that chapter in TOC
       const el = document.getElementById(`toc-${slug}`);
       el?.scrollIntoView({ behavior: "smooth" });
     }
@@ -50,58 +47,59 @@ export default function CourseDetailPage() {
 
   return (
     <motion.div
-      className="flex h-full"
+      className="flex flex-col h-full"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
     >
-      {/* Left: Knowledge Tree */}
-      <div className="relative" style={{ width: treeVisible ? "360px" : "0px", transition: "width 0.3s ease" }}>
-        {treeVisible && (
-          <div className="w-[360px] h-full flex flex-col border-r border-[#eee] bg-[#fafafa]">
-            {/* Tree header */}
-            <div className="px-5 py-4 border-b border-[#eee] flex items-center justify-between">
-              <h2
-                className="text-[16px] text-[#000] font-bold m-0"
-                style={{ fontFamily: "var(--font-serif)" }}
-              >
-                {s.knowledge_tree}
-              </h2>
-              <button
-                onClick={() => setTreeVisible(false)}
-                className="text-[12px] text-[#999] hover:text-[#333] transition-colors bg-transparent border-none cursor-pointer"
-                style={{ fontFamily: "var(--font-serif)" }}
-              >
-                {s.collapse_tree} ◀
-              </button>
-            </div>
-            <div className="flex-1">
-              <KnowledgeTree
-                chapters={course.chapters}
-                sections={allSections}
-                locale={locale}
-                onNodeClick={handleNodeClick}
-              />
-            </div>
-          </div>
-        )}
+      {/* ====== Top: Knowledge Tree (large area, collapsible) ====== */}
+      <div
+        className="relative border-b border-[#eee] bg-[#fafafa]"
+        style={{ height: treeVisible ? "min(65vh, 700px)" : "0px", transition: "height 0.35s ease", overflow: "hidden" }}
+      >
+        {/* Tree header bar */}
+        <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-5 py-3 bg-[#fafafa]/90 backdrop-blur-sm border-b border-[#eee]">
+          <h2
+            className="text-[15px] text-[#000] font-bold m-0"
+            style={{ fontFamily: "var(--font-serif)" }}
+          >
+            {s.knowledge_tree} — {course.title}
+          </h2>
+          <button
+            onClick={() => setTreeVisible(false)}
+            className="text-[12px] text-[#999] hover:text-[#333] transition-colors bg-transparent border-none cursor-pointer"
+            style={{ fontFamily: "var(--font-serif)" }}
+          >
+            {s.collapse_tree} ▲
+          </button>
+        </div>
+
+        {/* The 3D canvas fills the rest */}
+        <div className="w-full h-full pt-[44px]">
+          <KnowledgeTree
+            chapters={course.chapters}
+            sections={allSections}
+            locale={locale}
+            onNodeClick={handleNodeClick}
+          />
+        </div>
       </div>
 
-      {/* Toggle button when tree hidden */}
+      {/* Toggle when tree hidden */}
       {!treeVisible && (
         <button
           onClick={() => setTreeVisible(true)}
-          className="absolute left-0 top-4 z-20 bg-white border border-[#ccc] rounded-r-[8px] px-2 py-4 text-[12px] text-[#666] hover:text-[#333] transition-colors cursor-pointer"
+          className="w-full py-2.5 bg-[#fafafa] border-b border-[#eee] text-[12px] text-[#666] hover:text-[#333] transition-colors cursor-pointer"
           style={{ fontFamily: "var(--font-serif)" }}
         >
-          {s.expand_tree} ▶
+          {s.expand_tree} ▼
         </button>
       )}
 
-      {/* Right: Course Title + TOC */}
+      {/* ====== Bottom: Course header + TOC ====== */}
       <div className="flex-1 overflow-y-auto">
         {/* Course header */}
-        <div className="px-10 pt-8 pb-6 border-b border-[#eee]">
+        <div className="px-10 pt-6 pb-5 border-b border-[#eee]">
           <div className="flex items-center gap-4 mb-2">
             <img
               src={course.coverImage}

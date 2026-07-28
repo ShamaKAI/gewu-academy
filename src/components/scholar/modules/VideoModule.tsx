@@ -13,7 +13,11 @@ interface VideoModuleProps {
 export default function VideoModule({ videos, s }: VideoModuleProps) {
   const [activeIdx, setActiveIdx] = useState(0);
   const [speed, setSpeed] = useState(1);
+  const [userVideos, setUserVideos] = useState<VideoItem[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const allVideos = [...videos, ...userVideos];
 
   const handleSpeedChange = (newSpeed: number) => {
     setSpeed(newSpeed);
@@ -22,23 +26,59 @@ export default function VideoModule({ videos, s }: VideoModuleProps) {
     }
   };
 
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    Array.from(files).forEach((file) => {
+      const url = URL.createObjectURL(file);
+      const ext = file.name.split(".").pop()?.toLowerCase() || "mp4";
+      const newVideo: VideoItem = {
+        id: `uploaded-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        title: file.name,
+        src: url,
+        type: ext,
+      };
+      setUserVideos((prev) => [...prev, newVideo]);
+      // Switch to the newly uploaded video
+      setActiveIdx(allVideos.length);
+    });
+    // Reset input so same file can be re-uploaded
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   return (
     <div>
-      <h2 className="text-[20px] text-[#000] font-bold m-0 mb-5 tracking-[calc(var(--ls-scale)*2px)]"
-        style={{ fontFamily: "var(--font-serif)" }}>
+      <h2
+        className="text-[20px] text-[#000] font-bold m-0 mb-5 tracking-[calc(var(--ls-scale)*2px)]"
+        style={{ fontFamily: "var(--font-serif)" }}
+      >
         {s.tab_video}
       </h2>
 
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="video/mp4,video/webm,video/quicktime,video/x-msvideo,video/x-matroska,.mp4,.webm,.mov,.avi,.mkv"
+        multiple
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
       {/* Upload button */}
       <button
-        onClick={() => alert("上传功能即将开放")}
+        onClick={handleUploadClick}
         className="mb-5 px-5 py-2.5 border border-dashed border-[#ccc] rounded-[10px] text-[13px] text-[#666] bg-[#fafafa] cursor-pointer hover:border-[#999] hover:text-[#333] transition-colors"
         style={{ fontFamily: "var(--font-serif)" }}
       >
         + {s.upload_video}（支持 MP4, MOV, WebM, AVI, MKV）
       </button>
 
-      {videos.length === 0 ? (
+      {allVideos.length === 0 ? (
         <p className="text-[#999] text-[14px] py-8" style={{ fontFamily: "var(--font-serif)" }}>
           暂无课程视频，请上传
         </p>
@@ -49,7 +89,7 @@ export default function VideoModule({ videos, s }: VideoModuleProps) {
             <video
               ref={videoRef}
               key={activeIdx}
-              src={videos[activeIdx].src}
+              src={allVideos[activeIdx]?.src}
               controls
               className="w-full max-h-[480px]"
               style={{ background: "#000" }}
@@ -79,7 +119,7 @@ export default function VideoModule({ videos, s }: VideoModuleProps) {
 
           {/* Video list */}
           <div className="space-y-2">
-            {videos.map((v, i) => (
+            {allVideos.map((v, i) => (
               <button
                 key={v.id}
                 onClick={() => setActiveIdx(i)}
@@ -90,10 +130,16 @@ export default function VideoModule({ videos, s }: VideoModuleProps) {
                 }`}
               >
                 <span className="text-[18px]">▶</span>
-                <span className="text-[14px] text-[#333] font-bold" style={{ fontFamily: "var(--font-serif)" }}>
+                <span
+                  className="text-[14px] text-[#333] font-bold"
+                  style={{ fontFamily: "var(--font-serif)" }}
+                >
                   {v.title}
                 </span>
-                <span className="ml-auto text-[11px] text-[#999] uppercase" style={{ fontFamily: "var(--font-display)" }}>
+                <span
+                  className="ml-auto text-[11px] text-[#999] uppercase"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
                   {v.type}
                 </span>
               </button>

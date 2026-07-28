@@ -1,16 +1,15 @@
 "use client";
 
-import { useRef, useMemo, useCallback } from "react";
-import { Canvas } from "@react-three/fiber";
+import { useState, useRef, useMemo, useCallback } from "react";
+import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { Line, Sphere, Html, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import type { Chapter, CourseSection } from "@/data/courses";
 
 /* ============================================================
-   3D Knowledge Tree — react-three-fiber
-   Nodes: Root → Chapter → Section (2 levels)
-   Manual drag only (no auto-rotate), locale-aware labels
-   Fonts: KaiTi (Chinese), Times New Roman (English/Malay/numbers)
+   3D Knowledge Tree — Click-to-expand, draggable nodes, full text
+   Chapters start visible. Click chapter → expand its sections.
+   Click section → navigate. All nodes draggable.
    ============================================================ */
 
 interface TreeNodeData {
@@ -18,39 +17,173 @@ interface TreeNodeData {
   label: string;
   labelEn: string;
   labelMs: string;
-  level: number;
-  parentId: string | null;
+  level: number; // 1=chapter, 2=section
+  parentId: string | null; // null for chapter, chapter slug for section
   slug: string;
-  parentChapterSlug?: string; // for sections: the chapter slug they belong to
 }
 
 function getBestLabel(n: TreeNodeData, locale: string): string {
   if (locale === "en" && n.labelEn) return n.labelEn;
   if (locale === "ms" && n.labelMs) return n.labelMs;
-  return n.label; // fallback to zh
+  return n.label;
 }
 
 function isChinese(text: string): boolean {
   return /[一-鿿]/.test(text);
 }
 
-function layoutTree(chapters: Chapter[], sections: CourseSection[]): TreeNodeData[] {
-  const nodes: TreeNodeData[] = [
-    { id: "root", label: "", labelEn: "", labelMs: "", level: 0, parentId: null, slug: "" },
-  ];
+/* ---- Drag behaviour for a single node ---- */
+function DraggableNode({
+  position: initialPos,
+  radius,
+  color,
+  label,
+  useKaiTi,
+  isChapter,
+  onClick,
+}: {
+  position: [number, number, number];
+  radius: number;
+  color: string;
+  label: string;
+  useKaiTi: boolean;
+  isChapter: boolean;
+  onClick: () => void;
+}) {
+  const meshRef = useRef<THREE.Mesh>(null!);
+  const [pos, setPos] = useState(initialPos);
+  const dragging = useRef(false);
+  const dragStart = useRef<{ x: number; y: number; z: number } | null>(null);
+  const { gl } = useThree();
+
+  // Sync when initialPos changes from outside
+  const prevInitial = useRef(initialPos);
+  if (prevInitial.current[0] !== initialPos[0] || prevInitial.current[1] !== initialPos[1] || prevInitial.current[2] !== initialPos[2]) {
+    prevInitial.current = initialPos;
+    if (!dragging.current) setPos(initialPos);
+  }
+
+  const handlePointerDown = useCallback(
+    (e: { stopPropagation: () => void; point: { x: number; y: number; z: number } }) => {
+      e.stopPropagation();
+      dragging.current = true;
+      dragStart.current = { x: e.point.x, y: e.point.y, z: e.point.z };
+      (gl.domElement as HTMLElement).style.cursor = "grabbing";
+    },
+    [gl]
+  );
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  useFrame((_state, _delta) => {
+    // Drag handled in onPointerMove
+  });
+
+  const handlePointerMove = useCallback(
+    (e: { point: { x: number; y: number; z: number } }) => {
+      if (!dragging.current || !dragStart.current) return;
+      // Project pointer onto the plane at the node's depth
+      const dx = e.point.x - dragStart.current.x;
+      const dy = e.point.y - dragStart.current.y;
+      setPos((prev) => [prev[0] + dx, prev[1] + dy, prev[2]]);
+      dragStart.current = { x: e.point.x, y: e.point.y, z: e.point.z };
+    },
+    []
+  );
+
+  const handlePointerUp = useCallback(() => {
+    if (!dragging.current) {
+      // It was a click, not a drag
+      onClick();
+    }
+    dragging.current = false;
+    dragStart.current = null;
+    (gl.domElement as HTMLElement).style.cursor = "";
+  }, [onClick, gl]);
+
+  return (
+    <group position={pos}>
+      <Sphere
+        ref={meshRef}
+        args={[radius, 16, 16]}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+      >
+        <meshStandardMaterial color={color} />
+      </Sphere>
+      {label && (
+        <Html
+          position={[0, -(isChapter ? 0.4 : 0.3), 0]}
+          center
+          style={{ pointerEvents: "none" }}
+        >
+          <span
+            style={{
+              fontFamily: useKaiTi
+                ? "'KaiTi', 'STKaiti', '楷体', serif"
+                : "'Times New Roman', serif",
+              fontSize: isChapter ? "14px" : "12px",
+              fontWeight: isChapter ? 700 : 400,
+              color: "#333",
+              whiteSpace: "nowrap",
+              textShadow: "0 0 4px rgba(255,255,255,0.95)",
+            }}
+          >
+            {label}
+          </span>
+        </Html>
+      )}
+    </group>
+  );
+}
+
+/* ---- Position helpers ---- */
+function chapterPositions(chapters: TreeNodeData[]) {
+  const m = new Map<string, [number, number, number]>();
+  const count = chapters.length;
+  // Spread chapters in a wider ring
+  const radius = Math.max(count * 0.7, 2.0);
+  chapters.forEach((n, i) => {
+    const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
+    m.set(n.id, [Math.cos(angle) * radius, 1.0, Math.sin(angle) * radius]);
+  });
+  return m;
+}
+
+function sectionPositions(
+  sections: TreeNodeData[],
+  parentPos: [number, number, number],
+  parentId: string
+) {
+  const siblings = sections.filter((s) => s.parentId === parentId);
+  const m = new Map<string, [number, number, number]>();
+  const radius = Math.max(siblings.length * 0.35, 1.2);
+  siblings.forEach((n, i) => {
+    const angle = (i / siblings.length) * Math.PI * 2 - Math.PI / 2;
+    m.set(n.id, [
+      parentPos[0] + Math.cos(angle) * radius,
+      parentPos[1] - 1.0,
+      parentPos[2] + Math.sin(angle) * radius,
+    ]);
+  });
+  return m;
+}
+
+function buildTree(chapters: Chapter[], sections: CourseSection[]): TreeNodeData[] {
+  const result: TreeNodeData[] = [];
   chapters.forEach((ch) => {
-    nodes.push({
+    result.push({
       id: ch.slug,
       label: ch.title,
       labelEn: ch.titleEn || ch.title,
       labelMs: ch.titleMs || ch.title,
       level: 1,
-      parentId: "root",
+      parentId: null,
       slug: ch.slug,
     });
   });
   sections.forEach((sec) => {
-    nodes.push({
+    result.push({
       id: sec.slug,
       label: sec.title,
       labelEn: sec.titleEn || sec.title,
@@ -58,128 +191,124 @@ function layoutTree(chapters: Chapter[], sections: CourseSection[]): TreeNodeDat
       level: 2,
       parentId: sec.chapterSlug,
       slug: sec.slug,
-      parentChapterSlug: sec.chapterSlug,
     });
   });
-  return nodes;
+  return result;
 }
 
-function positions(nodes: TreeNodeData[]) {
-  const posMap = new Map<string, [number, number, number]>();
-  posMap.set("root", [0, 2.5, 0]);
-
-  const level1 = nodes.filter((n) => n.level === 1);
-  const radius1 = 2.2;
-  level1.forEach((n, i) => {
-    const angle = (i / level1.length) * Math.PI * 2 - Math.PI / 2;
-    posMap.set(n.id, [Math.cos(angle) * radius1, 0.8, Math.sin(angle) * radius1]);
-  });
-
-  const level2 = nodes.filter((n) => n.level === 2 && n.parentId !== null) as (TreeNodeData & { parentId: string })[];
-  const radius2 = 1.3;
-  const countMap = new Map<string, number>();
-  level2.forEach((n) => { countMap.set(n.parentId, (countMap.get(n.parentId) || 0) + 1); });
-  const idxMap = new Map<string, number>();
-  level2.forEach((n) => {
-    const parentPos = posMap.get(n.parentId)!;
-    const totalSibs = countMap.get(n.parentId) || 1;
-    const idx = idxMap.get(n.parentId) || 0;
-    const angle = (idx / totalSibs) * Math.PI * 2 - Math.PI / 2 + (totalSibs <= 2 ? 0.3 : 0);
-    const offset: [number, number, number] = [
-      Math.cos(angle) * radius2,
-      -0.8,
-      Math.sin(angle) * radius2,
-    ];
-    posMap.set(n.id, [parentPos[0] + offset[0], parentPos[1] + offset[1], parentPos[2] + offset[2]]);
-    idxMap.set(n.parentId, idx + 1);
-  });
-
-  return posMap;
-}
+/* ---- ---- */
 
 function TreeScene({
-  nodes,
+  chapters,
+  sections,
   locale,
-  onNodeClick,
+  expanded,
+  toggleChapter,
+  onSectionClick,
 }: {
-  nodes: TreeNodeData[];
+  chapters: TreeNodeData[];
+  sections: TreeNodeData[];
   locale: string;
-  onNodeClick: (slug: string) => void;
+  expanded: Set<string>;
+  toggleChapter: (slug: string) => void;
+  onSectionClick: (slug: string) => void;
 }) {
   const groupRef = useRef<THREE.Group>(null!);
-  const posMap = useMemo(() => positions(nodes), [nodes]);
-
-  const handleClick = useCallback(
-    (slug: string) => { onNodeClick(slug); },
-    [onNodeClick]
-  );
+  const chapPos = useMemo(() => chapterPositions(chapters), [chapters]);
 
   return (
     <group ref={groupRef}>
-      {/* Edges */}
-      {nodes
-        .filter((n): n is TreeNodeData & { parentId: string } => n.parentId !== null)
-        .map((n) => {
-          const parentPos = posMap.get(n.parentId)!;
-          const myPos = posMap.get(n.id)!;
+      {/* Edges: chapters connected to center */}
+      {chapters.map((ch) => {
+        const pos = chapPos.get(ch.id)!;
+        return (
+          <Line
+            key={`edge-root-${ch.id}`}
+            points={[[0, 3.0, 0], pos]}
+            color="#ccc"
+            lineWidth={0.3}
+            transparent
+            opacity={0.4}
+          />
+        );
+      })}
+
+      {/* Edges: sections → parent chapters */}
+      {sections
+        .filter((sec) => expanded.has(sec.parentId!))
+        .map((sec) => {
+          const parentPos = chapPos.get(sec.parentId!)!;
+          const secSiblings = sections.filter(
+            (s) => s.parentId === sec.parentId && expanded.has(sec.parentId!)
+          );
+          const secMap = sectionPositions(secSiblings, parentPos, sec.parentId!);
+          const myPos = secMap.get(sec.id)!;
           return (
             <Line
-              key={`edge-${n.id}`}
+              key={`edge-${sec.id}`}
               points={[parentPos, myPos]}
-              color="#bbb"
-              lineWidth={0.5}
+              color="#ddd"
+              lineWidth={0.3}
               transparent
-              opacity={0.5}
+              opacity={0.35}
             />
           );
         })}
 
-      {/* Nodes */}
-      {nodes.map((n) => {
-        const pos = posMap.get(n.id)!;
-        const isRoot = n.level === 0;
-        const isChapter = n.level === 1;
-        const radius = isRoot ? 0.25 : isChapter ? 0.15 : 0.1;
-        const color = isRoot ? "#333" : isChapter ? "#555" : "#888";
-        const label = getBestLabel(n, locale);
-        const useKaiTi = isChinese(label);
+      {/* Center origin dot */}
+      <Sphere args={[0.12, 16, 16]} position={[0, 3.0, 0]}>
+        <meshStandardMaterial color="#999" />
+      </Sphere>
 
+      {/* Chapter nodes */}
+      {chapters.map((ch) => {
+        const pos = chapPos.get(ch.id)!;
+        const label = getBestLabel(ch, locale);
+        const useKaiTi = isChinese(label);
         return (
-          <group key={n.id}>
-            <Sphere
-              args={[radius, 16, 16]}
-              position={pos}
-              onClick={() => n.slug && handleClick(n.slug)}
-            >
-              <meshStandardMaterial color={color} />
-            </Sphere>
-            {label && (
-              <Html
-                position={[pos[0], pos[1] - (isChapter ? 0.3 : 0.2), pos[2]]}
-                center
-                style={{ pointerEvents: "none" }}
-              >
-                <span
-                  style={{
-                    fontFamily: useKaiTi
-                      ? "'KaiTi', 'STKaiti', '楷体', serif"
-                      : "'Times New Roman', serif",
-                    fontSize: isChapter ? "13px" : "11px",
-                    color: "#333",
-                    whiteSpace: "nowrap",
-                    textShadow: "0 0 4px rgba(255,255,255,0.9)",
-                  }}
-                >
-                  {label.length > 8 ? label.slice(0, 8) + "…" : label}
-                </span>
-              </Html>
-            )}
-          </group>
+          <DraggableNode
+            key={ch.id}
+            position={pos}
+            radius={0.18}
+            color="#555"
+            label={label}
+            useKaiTi={useKaiTi}
+            isChapter
+            onClick={() => toggleChapter(ch.slug)}
+          />
         );
       })}
+
+      {/* Section nodes — only for expanded chapters */}
+      {sections
+        .filter((sec) => expanded.has(sec.parentId!))
+        .map((sec) => {
+          const parentPos = chapPos.get(sec.parentId!)!;
+          const siblings = sections.filter(
+            (s) => s.parentId === sec.parentId && expanded.has(sec.parentId!)
+          );
+          const secMap = sectionPositions(siblings, parentPos, sec.parentId!);
+          const pos = secMap.get(sec.id)!;
+          const label = getBestLabel(sec, locale);
+          const useKaiTi = isChinese(label);
+          return (
+            <DraggableNode
+              key={sec.id}
+              position={pos}
+              radius={0.1}
+              color="#888"
+              label={label}
+              useKaiTi={useKaiTi}
+              isChapter={false}
+              onClick={() => onSectionClick(sec.slug)}
+            />
+          );
+        })}
     </group>
   );
 }
+
+/* ---- ---- */
 
 interface KnowledgeTreeProps {
   chapters: Chapter[];
@@ -188,14 +317,55 @@ interface KnowledgeTreeProps {
   onNodeClick: (slug: string) => void;
 }
 
-export default function KnowledgeTree({ chapters, sections, locale, onNodeClick }: KnowledgeTreeProps) {
-  const nodes = useMemo(() => layoutTree(chapters, sections), [chapters, sections]);
+export default function KnowledgeTree({
+  chapters,
+  sections,
+  locale,
+  onNodeClick,
+}: KnowledgeTreeProps) {
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+  const allNodes = useMemo(
+    () => buildTree(chapters, sections),
+    [chapters, sections]
+  );
+  const chapterNodes = useMemo(
+    () => allNodes.filter((n) => n.level === 1),
+    [allNodes]
+  );
+  const sectionNodes = useMemo(
+    () => allNodes.filter((n) => n.level === 2),
+    [allNodes]
+  );
+
+  const toggleChapter = useCallback((slug: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(slug)) next.delete(slug);
+      else next.add(slug);
+      return next;
+    });
+  }, []);
+
+  const handleSectionClick = useCallback(
+    (slug: string) => {
+      onNodeClick(slug);
+    },
+    [onNodeClick]
+  );
 
   if (chapters.length === 0) {
-    const emptyLabel = locale === "en" ? "No knowledge tree" : locale === "ms" ? "Tiada pohon ilmu" : "暂无知识图谱";
+    const emptyLabel =
+      locale === "en"
+        ? "No knowledge tree"
+        : locale === "ms"
+        ? "Tiada pohon ilmu"
+        : "暂无知识图谱";
     return (
-      <div className="flex items-center justify-center h-full text-[#999] text-[13px]"
-        style={{ fontFamily: "var(--font-serif)" }}>
+      <div
+        className="flex items-center justify-center h-full text-[#999] text-[13px]"
+        style={{ fontFamily: "var(--font-serif)" }}
+      >
         {emptyLabel}
       </div>
     );
@@ -203,14 +373,28 @@ export default function KnowledgeTree({ chapters, sections, locale, onNodeClick 
 
   return (
     <Canvas
-      camera={{ position: [0, 1, 6], fov: 50 }}
+      camera={{ position: [0, 0.5, 8], fov: 55 }}
       style={{ background: "transparent" }}
       gl={{ alpha: true, antialias: true }}
     >
-      <ambientLight intensity={0.8} />
-      <directionalLight position={[5, 5, 5]} intensity={0.6} />
-      <OrbitControls enableDamping dampingFactor={0.08} enableZoom={false} autoRotate={false} />
-      <TreeScene nodes={nodes} locale={locale} onNodeClick={onNodeClick} />
+      <ambientLight intensity={0.9} />
+      <directionalLight position={[5, 8, 5]} intensity={0.5} />
+      <OrbitControls
+        enableDamping
+        dampingFactor={0.08}
+        enableZoom
+        autoRotate={false}
+        minDistance={3}
+        maxDistance={15}
+      />
+      <TreeScene
+        chapters={chapterNodes}
+        sections={sectionNodes}
+        locale={locale}
+        expanded={expanded}
+        toggleChapter={toggleChapter}
+        onSectionClick={handleSectionClick}
+      />
     </Canvas>
   );
 }
