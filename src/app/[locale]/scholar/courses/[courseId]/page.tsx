@@ -45,9 +45,9 @@ export default function CourseDetailPage() {
             — {course.title}
           </span>
         </div>
-        {/* Collapse button — top right */}
+        {/* Collapse button — bottom right, never under lang switch */}
         <button onClick={() => setTreeVisible(false)}
-          className="absolute top-3 right-5 z-10 text-[12px] text-[#999] hover:text-[#333] transition-colors bg-transparent border-none cursor-pointer"
+          className="absolute bottom-4 right-5 z-10 text-[12px] text-[#999] hover:text-[#333] transition-colors bg-white/80 backdrop-blur-sm border border-[#ddd] rounded-[8px] px-3 py-1.5 cursor-pointer"
           style={{ fontFamily: "var(--font-serif)" }}>{s.collapse_tree} ▲</button>
 
         <div className="w-full h-full">

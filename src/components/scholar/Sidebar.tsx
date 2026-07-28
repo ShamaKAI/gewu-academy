@@ -3,17 +3,27 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "@/i18n/useTranslation";
-import { IconAcademy, IconCourses, IconAnalytics, IconMentors, IconNews, IconDesk, IconMail, IconLogout } from "./Icons";
+import { IconMail, IconLogout } from "./Icons";
 
 const navItems = [
-  { key: "academy", Icon: IconAcademy, href: "/scholar" },
-  { key: "courses", Icon: IconCourses, href: "/scholar/courses" },
-  { key: "analytics", Icon: IconAnalytics, href: "/scholar/analytics" },
-  { key: "mentors", Icon: IconMentors, href: "/scholar/mentors" },
-  { key: "news", Icon: IconNews, href: "/scholar/news" },
-  { key: "desk", Icon: IconDesk, href: "/scholar/desk" },
-  { key: "library", Icon: IconMail, href: "/scholar/library" },
+  { key: "academy", href: "/scholar" },
+  { key: "courses", href: "/scholar/courses" },
+  { key: "analytics", href: "/scholar/analytics" },
+  { key: "mentors", href: "/scholar/mentors" },
+  { key: "news", href: "/scholar/news" },
+  { key: "desk", href: "/scholar/desk" },
+  { key: "library", href: "/scholar/library" },
 ];
+
+function NavIcon({ name }: { name: string }) {
+  return (
+    <img
+      src={`/icons/nav-${name}.png`}
+      alt=""
+      style={{ width: 22, height: 22, objectFit: "contain", flexShrink: 0 }}
+    />
+  );
+}
 
 export default function Sidebar() {
   const { t, locale } = useTranslation();
@@ -43,7 +53,7 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 px-4 flex flex-col gap-1">
-        {navItems.map(({ key, Icon, href }) => {
+        {navItems.map(({ key, href }) => {
           const fullHref = `/${locale}${href}`;
           const currentPath = pathname.replace(/^\/[a-z]{2}/, "");
           const isActive = currentPath === href;
@@ -58,11 +68,10 @@ export default function Sidebar() {
               }`}
               style={{ fontFamily: "var(--font-serif)" }}
             >
-              {/* Left bar indicator for active */}
               {isActive && (
                 <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-[#000]" />
               )}
-              <span className="text-[#333]"><Icon /></span>
+              <NavIcon name={key} />
               <span>{s[`nav_${key}`]}</span>
             </Link>
           );
@@ -71,20 +80,18 @@ export default function Sidebar() {
 
       {/* Bottom actions */}
       <div className="px-4 pb-8 flex flex-col gap-1">
-        {/* Settings placeholder */}
         <div className="flex items-center gap-3 pl-4 pr-3 py-2.5 rounded-[10px] text-[14px] text-[#666] tracking-[calc(var(--ls-scale)*1.5px)] cursor-pointer hover:text-[#333] hover:bg-white/60 transition-all duration-200"
           style={{ fontFamily: "var(--font-serif)" }}>
-          <span className="text-[#333]"><IconMail /></span>
+          <span className="w-[22px] h-[22px] flex-shrink-0" />
           <span>{s.nav_settings}</span>
         </div>
-        {/* Logout */}
         <Link href={`/${locale}`}
           className="flex items-center gap-3 pl-4 pr-3 py-2.5 rounded-[10px] text-[14px] text-[#666] tracking-[calc(var(--ls-scale)*1.5px)] hover:text-[#333] hover:bg-white/60 transition-all duration-200 no-underline"
           style={{ fontFamily: "var(--font-serif)" }}>
-          <span className="text-[#333]"><IconLogout /></span>
+          <span className="w-[22px] h-[22px] flex-shrink-0" />
           <span>{s.nav_logout}</span>
         </Link>
-              </div>
+      </div>
     </aside>
   );
 }
