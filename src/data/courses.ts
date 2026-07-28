@@ -190,9 +190,7 @@ export const courses: Course[] = [
         ],
         modules: {
           videos: [],
-          pptFiles: [
-            { id: "ppt1", title: "格物致知课程讲义", type: "pdf", src: "/sample/sample-slides.pdf" },
-          ],
+          pptFiles: [],
           content: mockContent("格物致知的本源"),
           exercises: mockExercises(),
           reviews: mockReviews(),
@@ -210,9 +208,7 @@ export const courses: Course[] = [
         ],
         modules: {
           videos: [],
-          pptFiles: [
-            { id: "ppt2", title: "知行合一讲义", type: "pdf", src: "/sample/sample-slides.pdf" },
-          ],
+          pptFiles: [],
           content: mockContent("知行合一"),
           exercises: mockExercises(),
           reviews: [
