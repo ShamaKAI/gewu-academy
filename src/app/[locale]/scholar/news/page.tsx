@@ -48,7 +48,7 @@ export default function NewsPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-[12px] px-2.5 py-[3px] rounded-[5px] font-bold border border-[#000]" style={{ fontFamily: "var(--font-serif)" }}>{NEWS_CATEGORIES[n.category]}</span>
-                        <span className="text-[13px] text-[#000]" style={{ fontFamily: "var(--font-display)" }}>{n.date}</span>
+                        <span className="text-[13px] text-[#000]" style={{ fontFamily: "'Times New Roman', serif" }}>{n.date}</span>
                       </div>
                       <h3 className="text-[17px] text-[#000] font-bold m-0 mb-2" style={{ fontFamily: "var(--font-serif)" }}>{n.title}</h3>
                       <p className="text-[14px] text-[#000] m-0" style={{ fontFamily: "var(--font-serif)", opacity: 0.6 }}>{n.summary}</p>

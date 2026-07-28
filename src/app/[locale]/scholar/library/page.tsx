@@ -3,7 +3,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "@/i18n/useTranslation";
 import { motion, AnimatePresence } from "framer-motion";
-import { books, SHELVES } from "@/data/library";
+import { books } from "@/data/library";
+// 10 shelves, derived from book data
+const SHELVES = Array.from(new Set(books.map((b) => b.shelf)));
 import type { Book, BookChapter } from "@/data/library";
 
 const QUOTES = [

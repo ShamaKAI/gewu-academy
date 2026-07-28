@@ -98,6 +98,16 @@ export default function ScholarHome() {
   const [searchFocused, setSearchFocused] = useState(false);
   const username = "SHA";
 
+  // Dynamic greeting based on local time
+  const getGreeting = () => {
+    const h = new Date().getHours();
+    if (h < 6) return "晚安";
+    if (h < 12) return "早安";
+    if (h < 18) return "午安";
+    return "晚安";
+  };
+  const greetingWord = getGreeting();
+
   // Search courses from the courses list
   const searchResults = useMemo(() => {
     if (!search.trim()) return [];
@@ -130,7 +140,7 @@ export default function ScholarHome() {
       <div className="flex items-start justify-between mb-8">
         <div>
           <h1 className="text-[28px] text-[#000] tracking-[calc(var(--ls-scale)*3px)] font-bold m-0 leading-tight" style={{ fontFamily: "var(--font-serif)" }}>
-            {s.hero_greeting.replace("{name}", "")}
+            {greetingWord}，
             <span style={{ fontFamily: "'Times New Roman', serif" }}>{username}</span>
           </h1>
           <p className="text-[14px] text-[#000] m-0 mt-1.5" style={{ fontFamily: "var(--font-serif)" }}>{s.hero_subtitle}</p>

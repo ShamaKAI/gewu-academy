@@ -30,7 +30,7 @@ function StatCard({ value, label, sub }: { value: string; label: string; sub: st
   return (
     <motion.div className="bg-[#f7f7f7] rounded-[14px] p-6 cursor-pointer border border-[#000]"
       whileHover={{ y: -2, boxShadow: "0 1px 6px rgba(0,0,0,0.05)" }}>
-      <p className="text-[34px] text-[#000] font-bold m-0 leading-none" style={{ fontFamily: "var(--font-display)" }}>{value}</p>
+      <p className="text-[34px] text-[#000] font-bold m-0 leading-none" style={{ fontFamily: "'Times New Roman', serif" }}>{value}</p>
       <p className="text-[15px] text-[#000] font-bold m-0 mt-2" style={{ fontFamily: "var(--font-serif)" }}>{label}</p>
       <p className="text-[13px] text-[#000] m-0 mt-1" style={{ fontFamily: "var(--font-serif)" }}>{sub}</p>
     </motion.div>
@@ -79,7 +79,7 @@ export default function AnalyticsPage() {
                 initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.02, duration: 0.2 }}>
                 <div className="absolute left-[5px] top-1/2 -translate-y-1/2 w-[7px] h-[7px] rounded-full bg-[#555] border-2 border-white" />
                 <span className="text-[15px] text-[#000] flex-1" style={{ fontFamily: "var(--font-serif)" }}>{ev.text}</span>
-                <span className="text-[12px] text-[#000] flex-shrink-0 opacity-50" style={{ fontFamily: "var(--font-display)" }}>{ev.date}</span>
+                <span className="text-[12px] text-[#000] flex-shrink-0 opacity-50" style={{ fontFamily: "'Times New Roman', serif" }}>{ev.date}</span>
               </motion.div>
             ))}
           </div>

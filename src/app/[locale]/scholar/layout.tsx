@@ -14,12 +14,12 @@ export default function ScholarLayout({ children }: { children: React.ReactNode 
 
       {/* 中间主内容 */}
       <main
-        className="flex-1 ml-[200px] overflow-y-auto relative z-10"
+        className="flex-1 ml-[220px] overflow-y-auto relative z-10"
         style={{ height: "100vh" }}
       >
         {/* 背景图 — 30% 透明度 */}
         <div
-          className="fixed inset-0 ml-[200px] pointer-events-none"
+          className="fixed inset-0 ml-[220px] pointer-events-none"
           style={{ zIndex: 0, opacity: 0.30 }}
         >
           <img
@@ -31,7 +31,7 @@ export default function ScholarLayout({ children }: { children: React.ReactNode 
 
         {/* 白色柔光层，确保文字可读 */}
         <div
-          className="fixed inset-0 ml-[200px] pointer-events-none"
+          className="fixed inset-0 ml-[220px] pointer-events-none"
           style={{ zIndex: 1, background: "rgba(255,255,255,0.55)" }}
         />
 
@@ -39,7 +39,7 @@ export default function ScholarLayout({ children }: { children: React.ReactNode 
       </main>
 
       {/* 右上语言切换 */}
-      <div className="fixed top-3 right-[316px] z-30">
+      <div className="fixed top-3 right-[356px] z-30">
         <LangSwitch />
       </div>
 
