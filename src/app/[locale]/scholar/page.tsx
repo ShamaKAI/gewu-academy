@@ -32,30 +32,30 @@ const COVERS = {
 
 /* ---------- Mock 数据 ---------- */
 const myCourses: CourseData[] = [
-  { id: "c1", title: "《大学》精读",     category: "伦理文化", cover: COVERS.daxue,    progress: 78, rating: 4.9, mentor: "王阳明" },
-  { id: "c2", title: "风险管理基础",     category: "保险精算", cover: COVERS.fengxian, progress: 60, rating: 4.5, mentor: "陈省身" },
-  { id: "c3", title: "数据分析导论",     category: "数据科学", cover: COVERS.shuju,    progress: 45, rating: 4.3, mentor: "吴思远" },
-  { id: "c4", title: "金融数学建模",     category: "金融工程", cover: COVERS.jinrong,  progress: 92, rating: 4.7, mentor: "李归" },
+  { id: "great-learning", title: "《大学》精读",     category: "伦理文化", cover: COVERS.daxue,    progress: 78, rating: 4.9, mentor: "王阳明" },
+  { id: "risk-mgmt",       title: "风险管理基础",     category: "保险精算", cover: COVERS.fengxian, progress: 60, rating: 4.5, mentor: "陈省身" },
+  { id: "data-science",    title: "数据分析导论",     category: "数据科学", cover: COVERS.shuju,    progress: 45, rating: 4.3, mentor: "吴思远" },
+  { id: "fin-math",        title: "金融数学建模",     category: "金融工程", cover: COVERS.jinrong,  progress: 92, rating: 4.7, mentor: "李归" },
 ];
 
 const featuredCourses: CourseData[] = [
-  { id: "f1", title: "《大学》精读",         category: "伦理文化", cover: COVERS.daxue,    progress: 78, rating: 4.9, mentor: "王阳明" },
-  { id: "f2", title: "《传习录》研读",       category: "心学经典", cover: COVERS.chuanxi,  progress: 65, rating: 4.8, mentor: "陆九渊" },
-  { id: "f3", title: "金融数学建模",         category: "金融工程", cover: COVERS.jinrong,  progress: 92, rating: 4.7, mentor: "陈省身" },
-  { id: "f4", title: "《孙子兵法》与决策",   category: "战略思维", cover: COVERS.sunzi,    progress: 55, rating: 4.7, mentor: "孙武" },
+  { id: "great-learning", title: "《大学》精读",         category: "伦理文化", cover: COVERS.daxue,    progress: 78, rating: 4.9, mentor: "王阳明" },
+  { id: "lunyu",          title: "《传习录》研读",       category: "心学经典", cover: COVERS.chuanxi,  progress: 65, rating: 4.8, mentor: "陆九渊" },
+  { id: "fin-math",       title: "金融数学建模",         category: "金融工程", cover: COVERS.jinrong,  progress: 92, rating: 4.7, mentor: "陈省身" },
+  { id: "sunzi",          title: "《孙子兵法》与决策",   category: "战略思维", cover: COVERS.sunzi,    progress: 55, rating: 4.7, mentor: "孙武" },
 ];
 
 const requiredCourses: CourseData[] = [
-  { id: "r1", title: "《论语》精讲",         category: "伦理文化", cover: COVERS.lunyu,    progress: 82, required: true },
-  { id: "r2", title: "风险管理基础",         category: "保险精算", cover: COVERS.fengxian, progress: 60, required: true },
-  { id: "r3", title: "数据分析导论",         category: "数据科学", cover: COVERS.shuju,    progress: 45, required: true },
+  { id: "lunyu",          title: "《论语》精讲",         category: "伦理文化", cover: COVERS.lunyu,    progress: 82, required: true },
+  { id: "risk-mgmt",      title: "风险管理基础",         category: "保险精算", cover: COVERS.fengxian, progress: 60, required: true },
+  { id: "data-science",   title: "数据分析导论",         category: "数据科学", cover: COVERS.shuju,    progress: 45, required: true },
 ];
 
 const selectionCourses: CourseData[] = [
-  { id: "s1", title: "《道德经》现代解读",   category: "道家哲学", cover: COVERS.daode,    progress: 70, rating: 4.4 },
-  { id: "s2", title: "Python 与量化投资",    category: "编程应用", cover: COVERS.python,   progress: 50, rating: 4.3 },
-  { id: "s3", title: "《诗经》鉴赏",         category: "文学艺术", cover: COVERS.shijing,  progress: 38, rating: 4.2 },
-  { id: "s4", title: "统计学习基础",         category: "数据科学", cover: COVERS.tongji,   progress: 88, rating: 4.1 },
+  { id: "daodejing",      title: "《道德经》现代解读",   category: "道家哲学", cover: COVERS.daode,    progress: 70, rating: 4.4 },
+  { id: "python-quant",   title: "Python 与量化投资",    category: "编程应用", cover: COVERS.python,   progress: 50, rating: 4.3 },
+  { id: "shijing",        title: "《诗经》鉴赏",         category: "文学艺术", cover: COVERS.shijing,  progress: 38, rating: 4.2 },
+  { id: "stats-ml",       title: "统计学习基础",         category: "数据科学", cover: COVERS.tongji,   progress: 88, rating: 4.1 },
 ];
 
 /* ---------- 原有小组件 ---------- */
@@ -227,16 +227,16 @@ export default function ScholarHome() {
       </div>
 
       {/* ====== 我的课程 ====== */}
-      <CourseSection title={s.courses_title} moreLabel={s.courses_more} courses={myCourses} columns={4} variant="small" />
+      <CourseSection title={s.courses_title} moreLabel={s.courses_more} courses={myCourses} columns={4} variant="small" locale={locale} />
 
       {/* ====== 镇院典籍 ====== */}
-      <CourseSection title={s.featured_title} moreLabel={s.featured_more} courses={featuredCourses} columns={2} variant="large" showRating showMentor />
+      <CourseSection title={s.featured_title} moreLabel={s.featured_more} courses={featuredCourses} columns={2} variant="large" showRating showMentor locale={locale} />
 
       {/* ====== 修习必读 ====== */}
-      <CourseSection title={s.required_title} moreLabel={s.required_more} courses={requiredCourses} columns={3} variant="medium" showBadge badgeLabel={s.required_badge} />
+      <CourseSection title={s.required_title} moreLabel={s.required_more} courses={requiredCourses} columns={3} variant="medium" showBadge badgeLabel={s.required_badge} locale={locale} />
 
       {/* ====== 格物精选 ====== */}
-      <CourseSection title={s.selection_title} moreLabel={s.selection_more} courses={selectionCourses} columns={4} variant="small" />
+      <CourseSection title={s.selection_title} moreLabel={s.selection_more} courses={selectionCourses} columns={4} variant="small" locale={locale} />
 
       {/* ====== 近期活动 ====== */}
       <div>

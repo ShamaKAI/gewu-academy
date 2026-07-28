@@ -19,6 +19,7 @@ interface CourseSectionProps {
   showBadge?: boolean;
   badgeLabel?: string;
   onMore?: () => void;
+  locale?: string;
 }
 
 export default function CourseSection({
@@ -32,6 +33,7 @@ export default function CourseSection({
   showBadge = false,
   badgeLabel = "必修",
   onMore,
+  locale = "zh",
 }: CourseSectionProps) {
   /* 列数 → grid 类名 */
   const gridClass =
@@ -77,6 +79,7 @@ export default function CourseSection({
             showMentor={showMentor}
             showBadge={showBadge}
             badgeLabel={badgeLabel}
+            locale={locale}
           />
         ))}
       </div>
