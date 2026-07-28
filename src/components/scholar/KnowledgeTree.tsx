@@ -1,45 +1,73 @@
 "use client";
 
 import { useRef, useMemo, useCallback } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Text, Line, Sphere, OrbitControls } from "@react-three/drei";
+import { Canvas } from "@react-three/fiber";
+import { Line, Sphere, Html, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import type { Chapter, CourseSection } from "@/data/courses";
 
 /* ============================================================
    3D Knowledge Tree — react-three-fiber
    Nodes: Root → Chapter → Section (2 levels)
-   Auto-rotates, draggable, clickable nodes
+   Manual drag only (no auto-rotate), locale-aware labels
+   Fonts: KaiTi (Chinese), Times New Roman (English/Malay/numbers)
    ============================================================ */
 
 interface TreeNodeData {
   id: string;
   label: string;
-  level: number; // 0=root, 1=chapter, 2=section
+  labelEn: string;
+  labelMs: string;
+  level: number;
   parentId: string | null;
   slug: string;
+  parentChapterSlug?: string; // for sections: the chapter slug they belong to
+}
+
+function getBestLabel(n: TreeNodeData, locale: string): string {
+  if (locale === "en" && n.labelEn) return n.labelEn;
+  if (locale === "ms" && n.labelMs) return n.labelMs;
+  return n.label; // fallback to zh
+}
+
+function isChinese(text: string): boolean {
+  return /[一-鿿]/.test(text);
 }
 
 function layoutTree(chapters: Chapter[], sections: CourseSection[]): TreeNodeData[] {
   const nodes: TreeNodeData[] = [
-    { id: "root", label: "", level: 0, parentId: null, slug: "" },
+    { id: "root", label: "", labelEn: "", labelMs: "", level: 0, parentId: null, slug: "" },
   ];
   chapters.forEach((ch) => {
-    nodes.push({ id: ch.slug, label: ch.title, level: 1, parentId: "root", slug: ch.slug });
+    nodes.push({
+      id: ch.slug,
+      label: ch.title,
+      labelEn: ch.titleEn || ch.title,
+      labelMs: ch.titleMs || ch.title,
+      level: 1,
+      parentId: "root",
+      slug: ch.slug,
+    });
   });
   sections.forEach((sec) => {
-    nodes.push({ id: sec.slug, label: sec.title, level: 2, parentId: sec.chapterSlug, slug: sec.slug });
+    nodes.push({
+      id: sec.slug,
+      label: sec.title,
+      labelEn: sec.titleEn || sec.title,
+      labelMs: sec.titleMs || sec.title,
+      level: 2,
+      parentId: sec.chapterSlug,
+      slug: sec.slug,
+      parentChapterSlug: sec.chapterSlug,
+    });
   });
   return nodes;
 }
 
 function positions(nodes: TreeNodeData[]) {
   const posMap = new Map<string, [number, number, number]>();
-
-  // Root at center top
   posMap.set("root", [0, 2.5, 0]);
 
-  // Chapters: ring around root
   const level1 = nodes.filter((n) => n.level === 1);
   const radius1 = 2.2;
   level1.forEach((n, i) => {
@@ -47,13 +75,10 @@ function positions(nodes: TreeNodeData[]) {
     posMap.set(n.id, [Math.cos(angle) * radius1, 0.8, Math.sin(angle) * radius1]);
   });
 
-  // Sections: ring around their parent chapter
   const level2 = nodes.filter((n) => n.level === 2 && n.parentId !== null) as (TreeNodeData & { parentId: string })[];
   const radius2 = 1.3;
   const countMap = new Map<string, number>();
-  level2.forEach((n) => {
-    countMap.set(n.parentId, (countMap.get(n.parentId) || 0) + 1);
-  });
+  level2.forEach((n) => { countMap.set(n.parentId, (countMap.get(n.parentId) || 0) + 1); });
   const idxMap = new Map<string, number>();
   level2.forEach((n) => {
     const parentPos = posMap.get(n.parentId)!;
@@ -74,25 +99,18 @@ function positions(nodes: TreeNodeData[]) {
 
 function TreeScene({
   nodes,
+  locale,
   onNodeClick,
 }: {
   nodes: TreeNodeData[];
+  locale: string;
   onNodeClick: (slug: string) => void;
 }) {
   const groupRef = useRef<THREE.Group>(null!);
   const posMap = useMemo(() => positions(nodes), [nodes]);
 
-  // Auto-rotate
-  useFrame((_, delta) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.15;
-    }
-  });
-
   const handleClick = useCallback(
-    (slug: string) => {
-      onNodeClick(slug);
-    },
+    (slug: string) => { onNodeClick(slug); },
     [onNodeClick]
   );
 
@@ -123,6 +141,8 @@ function TreeScene({
         const isChapter = n.level === 1;
         const radius = isRoot ? 0.25 : isChapter ? 0.15 : 0.1;
         const color = isRoot ? "#333" : isChapter ? "#555" : "#888";
+        const label = getBestLabel(n, locale);
+        const useKaiTi = isChinese(label);
 
         return (
           <group key={n.id}>
@@ -133,17 +153,26 @@ function TreeScene({
             >
               <meshStandardMaterial color={color} />
             </Sphere>
-            {n.label && (
-              <Text
+            {label && (
+              <Html
                 position={[pos[0], pos[1] - (isChapter ? 0.3 : 0.2), pos[2]]}
-                fontSize={isChapter ? 0.25 : 0.18}
-                color="#333"
-                anchorX="center"
-                anchorY="top"
-                maxWidth={3}
+                center
+                style={{ pointerEvents: "none" }}
               >
-                {n.label.length > 6 ? n.label.slice(0, 6) + "…" : n.label}
-              </Text>
+                <span
+                  style={{
+                    fontFamily: useKaiTi
+                      ? "'KaiTi', 'STKaiti', '楷体', serif"
+                      : "'Times New Roman', serif",
+                    fontSize: isChapter ? "13px" : "11px",
+                    color: "#333",
+                    whiteSpace: "nowrap",
+                    textShadow: "0 0 4px rgba(255,255,255,0.9)",
+                  }}
+                >
+                  {label.length > 8 ? label.slice(0, 8) + "…" : label}
+                </span>
+              </Html>
             )}
           </group>
         );
@@ -155,16 +184,19 @@ function TreeScene({
 interface KnowledgeTreeProps {
   chapters: Chapter[];
   sections: CourseSection[];
+  locale: string;
   onNodeClick: (slug: string) => void;
 }
 
-export default function KnowledgeTree({ chapters, sections, onNodeClick }: KnowledgeTreeProps) {
+export default function KnowledgeTree({ chapters, sections, locale, onNodeClick }: KnowledgeTreeProps) {
   const nodes = useMemo(() => layoutTree(chapters, sections), [chapters, sections]);
 
   if (chapters.length === 0) {
+    const emptyLabel = locale === "en" ? "No knowledge tree" : locale === "ms" ? "Tiada pohon ilmu" : "暂无知识图谱";
     return (
-      <div className="flex items-center justify-center h-full text-[#999] text-[13px]" style={{ fontFamily: "var(--font-serif)" }}>
-        暂无知识图谱
+      <div className="flex items-center justify-center h-full text-[#999] text-[13px]"
+        style={{ fontFamily: "var(--font-serif)" }}>
+        {emptyLabel}
       </div>
     );
   }
@@ -177,8 +209,8 @@ export default function KnowledgeTree({ chapters, sections, onNodeClick }: Knowl
     >
       <ambientLight intensity={0.8} />
       <directionalLight position={[5, 5, 5]} intensity={0.6} />
-      <OrbitControls enableDamping enableZoom={false} autoRotate={false} />
-      <TreeScene nodes={nodes} onNodeClick={onNodeClick} />
+      <OrbitControls enableDamping dampingFactor={0.08} enableZoom={false} autoRotate={false} />
+      <TreeScene nodes={nodes} locale={locale} onNodeClick={onNodeClick} />
     </Canvas>
   );
 }

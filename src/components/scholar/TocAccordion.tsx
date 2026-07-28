@@ -69,7 +69,7 @@ export default function TocAccordion({ chapters, courseId, locale, activeSection
                     {ch.sections.map((sec) => (
                       <Link
                         key={sec.slug}
-                        href={`/${locale}/scholar/courses/${courseId}/${sec.slug}`}
+                        href={`/${locale}/scholar/courses/${courseId}/${ch.slug}`}
                         className={`block px-10 py-2.5 text-[14px] no-underline transition-colors ${
                           activeSection === sec.slug
                             ? "text-[#000] font-bold bg-[#f0f0f0] border-l-[3px] border-[#333]"

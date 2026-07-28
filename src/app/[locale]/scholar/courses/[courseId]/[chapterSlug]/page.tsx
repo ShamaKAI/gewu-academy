@@ -33,7 +33,18 @@ export default function ChapterPage() {
   const chapterSlug = params?.chapterSlug as string;
 
   const course = courses.find((c) => c.id === courseId);
-  const chapter = course?.chapters.find((ch) => ch.slug === chapterSlug);
+  // Support both chapter slug and section slug in the URL
+  let chapter = course?.chapters.find((ch) => ch.slug === chapterSlug);
+  if (!chapter && course) {
+    // The slug might be a section slug — find the parent chapter
+    for (const ch of course.chapters) {
+      const sec = ch.sections.find((s) => s.slug === chapterSlug);
+      if (sec) {
+        chapter = ch;
+        break;
+      }
+    }
+  }
 
   const [activeTab, setActiveTab] = useState<TabKey>("content");
 

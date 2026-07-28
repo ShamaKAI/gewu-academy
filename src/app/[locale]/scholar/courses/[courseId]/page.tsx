@@ -79,6 +79,7 @@ export default function CourseDetailPage() {
               <KnowledgeTree
                 chapters={course.chapters}
                 sections={allSections}
+                locale={locale}
                 onNodeClick={handleNodeClick}
               />
             </div>
