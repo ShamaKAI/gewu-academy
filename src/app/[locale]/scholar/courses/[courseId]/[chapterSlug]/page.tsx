@@ -12,25 +12,15 @@ import NotesModule from "@/components/scholar/modules/NotesModule";
 import ExercisesModule from "@/components/scholar/modules/ExercisesModule";
 import ReviewModule from "@/components/scholar/modules/ReviewModule";
 
-/* Sprite icon: 1024×1536, 6 vertical segments → each 256px tall */
 const TAB_ICONS = ["video", "ppt", "content", "notes", "exercises", "review"] as const;
 type TabKey = (typeof TAB_ICONS)[number];
 
 function TabIcon({ tab, size = 24 }: { tab: TabKey; size?: number }) {
-  const idx = TAB_ICONS.indexOf(tab);
-  const bgY = idx * (100 / (TAB_ICONS.length - 1)); // 0%, 20%, 40%, 60%, 80%, 100%
   return (
-    <span
-      className="inline-block flex-shrink-0 rounded-[4px]"
-      style={{
-        width: size,
-        height: size,
-        backgroundImage: "url(/kechengyuansu.png)",
-        backgroundSize: `${size}px auto`,
-        backgroundPosition: `0 ${bgY}%`,
-        backgroundRepeat: "no-repeat",
-        imageRendering: "auto",
-      }}
+    <img
+      src={`/icons/tab-${tab}.png`}
+      alt=""
+      style={{ width: size, height: size, objectFit: "contain", flexShrink: 0 }}
     />
   );
 }
@@ -52,7 +42,7 @@ export default function ChapterPage() {
     }
   }
 
-  const [activeTab, setActiveTab] = useState<TabKey>("content");
+  const [activeTab, setActiveTab] = useState<TabKey>("video");
   const chapterIdx = course?.chapters.findIndex((ch) => ch.slug === chapter?.slug) ?? -1;
   const prevChapter = chapterIdx > 0 ? course?.chapters[chapterIdx - 1] : null;
   const nextChapter = chapterIdx < (course?.chapters.length ?? 0) - 1 ? course?.chapters[chapterIdx + 1] : null;

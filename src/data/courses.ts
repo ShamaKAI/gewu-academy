@@ -189,10 +189,7 @@ export const courses: Course[] = [
           { slug: "s1-3", title: "1.3 致知之道", titleEn: "1.3 The Path to Zhizhi", titleMs: "1.3 Jalan Menuju Zhizhi", chapterSlug: "ch1-ge-wu" },
         ],
         modules: {
-          videos: [
-            { id: "v1", title: "《大学》三纲领讲解", src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", type: "mp4" },
-            { id: "v2", title: "格物致知概念解析", src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4", type: "mp4" },
-          ],
+          videos: [],
           pptFiles: [
             { id: "ppt1", title: "格物致知课程讲义", type: "pdf", src: "/sample/sample-slides.pdf" },
           ],
@@ -212,9 +209,7 @@ export const courses: Course[] = [
           { slug: "s2-3", title: "2.3 知行互动", titleEn: "2.3 Knowledge-Action Interplay", titleMs: "2.3 Interaksi Ilmu-Tindakan", chapterSlug: "ch2-zhi-xing" },
         ],
         modules: {
-          videos: [
-            { id: "v3", title: "王阳明知行合一说", src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", type: "mp4" },
-          ],
+          videos: [],
           pptFiles: [
             { id: "ppt2", title: "知行合一讲义", type: "pdf", src: "/sample/sample-slides.pdf" },
           ],
