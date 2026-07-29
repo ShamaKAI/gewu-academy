@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "@/i18n/useTranslation";
 import { motion, AnimatePresence } from "framer-motion";
+import { courses as allCourses } from "@/data/courses";
 
 interface MentorData {
   name: string;
@@ -14,6 +15,17 @@ interface MentorData {
   specialties: string[];
   experience: string;
   courses: string[];
+}
+
+/** Match mentor course title to real course id */
+function findCourseId(title: string): string | null {
+  // Try exact match on title
+  let found = allCourses.find((c) => c.title === title);
+  if (found) return found.id;
+  // Try matching by stripping book-guillemet marks 《》
+  const stripped = title.replace(/[《》]/g, "");
+  found = allCourses.find((c) => c.title.replace(/[《》]/g, "").includes(stripped) || stripped.includes(c.title.replace(/[《》]/g, "")));
+  return found?.id || null;
 }
 
 const QUOTE_L = "“";
@@ -188,12 +200,23 @@ export default function MentorsPage() {
             <div>
               <h2 className="text-[18px] text-[#000] font-bold m-0 mb-4" style={{ fontFamily: "var(--font-serif)" }}>教授课程</h2>
               <div className="flex flex-col gap-2 w-full">
-                {selectedMentor.courses.map((course, i) => (
-                  <div key={i} className="flex items-center gap-3 p-4 bg-white rounded-[10px] border border-[#000]" style={{ borderLeftWidth: 4, borderLeftColor: selectedMentor.accent }}>
-                    <span className="text-[13px] font-bold text-[#000] flex-shrink-0 w-[28px]" style={{ fontFamily: "'Times New Roman', serif" }}>{String(i + 1).padStart(2, "0")}</span>
-                    <span className="text-[15px] text-[#000] font-bold" style={{ fontFamily: "var(--font-serif)" }}>{course}</span>
-                  </div>
-                ))}
+                {selectedMentor.courses.map((course, i) => {
+                  const cid = findCourseId(course);
+                  return cid ? (
+                    <button key={i} onClick={() => router.push(`/${locale}/scholar/courses/${cid}`)}
+                      className="flex items-center gap-3 p-4 bg-white rounded-[10px] border border-[#000] cursor-pointer hover:bg-[#f9f9f9] transition-colors text-left"
+                      style={{ borderLeftWidth: 4, borderLeftColor: selectedMentor.accent }}>
+                      <span className="text-[13px] font-bold text-[#000] flex-shrink-0 w-[28px]" style={{ fontFamily: "'Times New Roman', serif" }}>{String(i + 1).padStart(2, "0")}</span>
+                      <span className="text-[15px] text-[#000] font-bold flex-1" style={{ fontFamily: "var(--font-serif)" }}>{course}</span>
+                      <span className="text-[#000] opacity-30">&rarr;</span>
+                    </button>
+                  ) : (
+                    <div key={i} className="flex items-center gap-3 p-4 bg-white rounded-[10px] border border-[#000]" style={{ borderLeftWidth: 4, borderLeftColor: selectedMentor.accent }}>
+                      <span className="text-[13px] font-bold text-[#000] flex-shrink-0 w-[28px]" style={{ fontFamily: "'Times New Roman', serif" }}>{String(i + 1).padStart(2, "0")}</span>
+                      <span className="text-[15px] text-[#000] font-bold" style={{ fontFamily: "var(--font-serif)" }}>{course}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </motion.div>

@@ -11,6 +11,7 @@ import ContentModule from "@/components/scholar/modules/ContentModule";
 import NotesModule from "@/components/scholar/modules/NotesModule";
 import ExercisesModule from "@/components/scholar/modules/ExercisesModule";
 import ReviewModule from "@/components/scholar/modules/ReviewModule";
+import CommentSection from "@/components/scholar/CommentSection";
 
 const TAB_ICONS = ["video", "ppt", "content", "notes", "exercises", "review"] as const;
 type TabKey = (typeof TAB_ICONS)[number];
@@ -86,12 +87,12 @@ export default function ChapterPage() {
       {/* Right content */}
       <div className="flex-1 overflow-y-auto">
         <div className="px-10 py-8">
-          {activeTab === "video" && <VideoModule videos={chapter.modules.videos} s={s} />}
-          {activeTab === "ppt" && <PptModule pptFiles={chapter.modules.pptFiles} s={s} />}
-          {activeTab === "content" && <ContentModule content={chapter.modules.content} s={s} />}
-          {activeTab === "notes" && <NotesModule content={chapter.modules.content} s={s} />}
-          {activeTab === "exercises" && <ExercisesModule exercises={chapter.modules.exercises} s={s} />}
-          {activeTab === "review" && <ReviewModule reviews={chapter.modules.reviews} s={s} />}
+          {activeTab === "video" && <><VideoModule videos={chapter.modules.videos} s={s} /><CommentSection /></>}
+          {activeTab === "ppt" && <><PptModule pptFiles={chapter.modules.pptFiles} s={s} /><CommentSection /></>}
+          {activeTab === "content" && <><ContentModule content={chapter.modules.content} s={s} /><CommentSection /></>}
+          {activeTab === "notes" && <><NotesModule content={chapter.modules.content} s={s} /><CommentSection /></>}
+          {activeTab === "exercises" && <><ExercisesModule exercises={chapter.modules.exercises} s={s} /><CommentSection /></>}
+          {activeTab === "review" && <><ReviewModule reviews={chapter.modules.reviews} s={s} /><CommentSection /></>}
         </div>
       </div>
     </motion.div>

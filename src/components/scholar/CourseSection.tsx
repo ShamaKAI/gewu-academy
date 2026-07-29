@@ -6,7 +6,7 @@ import CourseCard, { type CourseData } from "./CourseCard";
 
 /* ============================================================
    CourseSection — 模块容器（标题栏 + 卡片网格）
-   columns: 2 | 3 | 4  — 查看更多默认跳转到典籍页
+   columns: 2 | 3 | 4  — 查看更多跳转到典籍页，可携带分类筛选
    ============================================================ */
 
 interface CourseSectionProps {
@@ -21,6 +21,9 @@ interface CourseSectionProps {
   badgeLabel?: string;
   onMore?: () => void;
   locale?: string;
+  filterCategory?: string;
+  filterModule?: string; // e.g. "my" | "featured" | "required" | "selection" | "mentor"
+  filterCourseIds?: string[]; // comma-separated in URL
 }
 
 export default function CourseSection({
@@ -35,6 +38,7 @@ export default function CourseSection({
   badgeLabel = "必修",
   onMore,
   locale = "zh",
+  filterCategory,
 }: CourseSectionProps) {
   const gridClass =
     columns === 2
@@ -43,7 +47,8 @@ export default function CourseSection({
         ? "grid grid-cols-3 gap-4"
         : "grid grid-cols-4 gap-4";
 
-  const moreHref = `/${locale}/scholar/courses`;
+  const courseIds = courses.map((c) => c.id).join(",");
+  const moreHref = onMore ? "#" : `/${locale}/scholar/courses?ids=${encodeURIComponent(courseIds)}${filterCategory ? `&cat=${encodeURIComponent(filterCategory)}` : ""}`;
 
   return (
     <motion.div

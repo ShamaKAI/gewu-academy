@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { courses } from "@/data/courses";
 import type { Exercise } from "@/data/courses";
 
-type TabKey = "exercises" | "mistakes" | "todos";
+type TabKey = "todos" | "exercises" | "mistakes" | "diary";
 
 interface MistakeItem { id: string; exercise: Exercise; courseTitle: string; wrongAnswer: string; date: string; }
 const mockMistakes: MistakeItem[] = [
@@ -30,6 +30,13 @@ const initialTodos: TodoItem[] = [
   { id: "t8", text: "整理医疗保险体系笔记", course: "医疗保障体系", done: false, due: "本周" },
 ];
 
+interface DiaryEntry { id: string; date: string; title: string; content: string; }
+const initialDiary: DiaryEntry[] = [
+  { id: "d1", date: "7/28", title: "格物致知，知行合一", content: "今天完成了《大学》精读第三章的学习，对格物致知有了更深的理解。朱子说格物就是穷究事物之理，而阳明先生则认为格物就是正其不正以归于正。两者看似矛盾，实则角度不同——朱子从外求，阳明从内省。真正的格物致知，或许应当内外兼修。" },
+  { id: "d2", date: "7/25", title: "金融建模的数学之美", content: "在陈省身先生的课上，第一次感受到Black-Scholes公式背后的数学优雅。偏微分方程的解最终收敛为一个简洁的定价公式，这种从复杂到简单的提炼过程，像极了中国哲学里的大道至简。" },
+  { id: "d3", date: "7/20", title: "《穷查理宝典》读后感", content: "芒格的多元思维模型给了我很大的启发。投资不是单一维度的计算，而是需要跨越心理学、经济学、历史学等多个学科的思维框架。这让我联想到格物学院的理念——格物不只是格一物，而是格万物，融会贯通。" },
+];
+
 const allExercises = courses.flatMap((c) =>
   c.chapters.flatMap((ch) =>
     ch.modules.exercises.map((ex) => ({ ...ex, courseTitle: c.title, courseId: c.id, chapterTitle: ch.title }))
@@ -39,9 +46,10 @@ const allExercises = courses.flatMap((c) =>
 type ExItem = (typeof allExercises)[number];
 
 const TABS: { key: TabKey; label: string; count?: number }[] = [
+  { key: "todos", label: "待办事项", count: initialTodos.filter((t) => !t.done).length },
   { key: "exercises", label: "习题库", count: allExercises.length },
   { key: "mistakes", label: "错题库", count: mockMistakes.length },
-  { key: "todos", label: "待办事项", count: initialTodos.filter((t) => !t.done).length },
+  { key: "diary", label: "学习日记" },
 ];
 
 export default function DeskPage() {
@@ -49,11 +57,13 @@ export default function DeskPage() {
   const s = t.scholar as Record<string, string>;
   const [tab, setTab] = useState<TabKey>("todos");
   const [todos, setTodos] = useState(initialTodos);
+  const [diary, setDiary] = useState(initialDiary);
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [submitted, setSubmitted] = useState<Set<string>>(new Set());
-  // Drill-down state
-  const [selectedCourse, setSelectedCourse] = useState<string | null>(null); // course title
+  const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const [selectedMistakeCourse, setSelectedMistakeCourse] = useState<string | null>(null);
+  const [newDiaryTitle, setNewDiaryTitle] = useState("");
+  const [newDiaryContent, setNewDiaryContent] = useState("");
 
   const toggleTodo = (id: string) => setTodos((prev) => prev.map((td) => (td.id === id ? { ...td, done: !td.done } : td)));
   const setAnswer = (exId: string, val: string | string[]) => { if (submitted.has(exId)) return; setAnswers((prev) => ({ ...prev, [exId]: val })); };
@@ -64,14 +74,19 @@ export default function DeskPage() {
     return ua === ex.answer;
   };
 
-  // Group exercises by course, sorted by chapter order appearance
+  const addDiary = () => {
+    if (!newDiaryTitle.trim() || !newDiaryContent.trim()) return;
+    const today = new Date();
+    setDiary((prev) => [{ id: `d${Date.now()}`, date: `${today.getMonth()+1}/${today.getDate()}`, title: newDiaryTitle.trim(), content: newDiaryContent.trim() }, ...prev]);
+    setNewDiaryTitle(""); setNewDiaryContent("");
+  };
+
   const exercisesByCourse = useMemo(() => {
     const map = new Map<string, ExItem[]>();
     allExercises.forEach((ex) => { if (!map.has(ex.courseTitle)) map.set(ex.courseTitle, []); map.get(ex.courseTitle)!.push(ex); });
     return Array.from(map.entries());
   }, []);
 
-  // Group mistakes by course, sorted newest first
   const mistakesByCourse = useMemo(() => {
     const map = new Map<string, MistakeItem[]>();
     [...mockMistakes].sort((a, b) => b.date.localeCompare(a.date)).forEach((m) => {
@@ -89,9 +104,7 @@ export default function DeskPage() {
           <span className="text-[13px] font-bold flex-shrink-0 mt-[3px]" style={{ fontFamily:"'Times New Roman',serif" }}>{i+1}.</span>
           <div className="flex-1">
             <p className="text-[14px] text-[#000] font-bold m-0" style={{ fontFamily:"var(--font-serif)" }}>{ex.question}</p>
-            <p className="text-[10px] text-[#000] m-0 mt-1 opacity-50" style={{ fontFamily:"var(--font-serif)" }}>
-              {ex.chapterTitle} · {ex.type==="single"?"单选":ex.type==="multi"?"多选":ex.type==="truefalse"?"判断":"填空"}
-            </p>
+            <p className="text-[10px] text-[#000] m-0 mt-1 opacity-50" style={{ fontFamily:"var(--font-serif)" }}>{ex.chapterTitle} · {ex.type==="single"?"单选":ex.type==="multi"?"多选":ex.type==="truefalse"?"判断":"填空"}</p>
           </div>
         </div>
         {ex.type === "fill" ? (
@@ -121,132 +134,8 @@ export default function DeskPage() {
     );
   };
 
-  // === Exercises Tab ===
-  const exercisesContent = (
-    <div className="max-w-2xl">
-      <AnimatePresence mode="wait">
-        {!selectedCourse ? (
-          <motion.div key="ex-courses" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}>
-            <div className="space-y-3">
-              {exercisesByCourse.map(([courseTitle, exs]) => (
-                <motion.button key={courseTitle} initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }}
-                  onClick={() => setSelectedCourse(courseTitle)}
-                  className="w-full flex items-center justify-between p-5 bg-white rounded-[14px] border border-[#000] cursor-pointer hover:bg-[#f9f9f9] text-left"
-                  whileHover={{ y:-1, boxShadow:"0 2px 8px rgba(0,0,0,0.06)" }}>
-                  <div>
-                    <h3 className="text-[16px] text-[#000] font-bold m-0" style={{ fontFamily:"var(--font-serif)" }}>{courseTitle}</h3>
-                    <p className="text-[12px] text-[#000] m-0 mt-1 opacity-50" style={{ fontFamily:"var(--font-serif)" }}>{exs.length} 道习题 · {exs[0]?.chapterTitle}</p>
-                  </div>
-                  <span className="text-[20px] text-[#000] opacity-40">→</span>
-                </motion.button>
-              ))}
-              {exercisesByCourse.length === 0 && <p className="text-[#000] py-8 opacity-50" style={{ fontFamily:"var(--font-serif)" }}>暂无习题</p>}
-            </div>
-          </motion.div>
-        ) : (
-          <motion.div key="ex-questions" initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}>
-            <button onClick={() => setSelectedCourse(null)} className="flex items-center gap-2 mb-5 text-[14px] text-[#000] bg-transparent border-none cursor-pointer hover:opacity-70" style={{ fontFamily:"var(--font-serif)" }}>← {selectedCourse}</button>
-            <div className="space-y-4">
-              {exercisesByCourse.find(([c])=>c===selectedCourse)?.[1].map((ex, i) => renderQuestion(ex, i))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-
-  // === Mistakes Tab ===
-  const mistakesContent = (
-    <div className="max-w-2xl">
-      <AnimatePresence mode="wait">
-        {!selectedMistakeCourse ? (
-          <motion.div key="mi-courses" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}>
-            {mistakesByCourse.length === 0 ? (
-              <p className="text-[#000] py-8 opacity-50" style={{ fontFamily:"var(--font-serif)" }}>暂无错题，继续加油！</p>
-            ) : (
-              <div className="space-y-3">
-                {mistakesByCourse.map(([courseTitle, items]) => (
-                  <motion.button key={courseTitle} initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }}
-                    onClick={() => setSelectedMistakeCourse(courseTitle)}
-                    className="w-full flex items-center justify-between p-5 bg-white rounded-[14px] border border-[#000] border-l-[4px] border-l-[#C04040] cursor-pointer hover:bg-[#f9f9f9] text-left"
-                    whileHover={{ y:-1, boxShadow:"0 2px 8px rgba(0,0,0,0.06)" }}>
-                    <div>
-                      <h3 className="text-[16px] text-[#000] font-bold m-0" style={{ fontFamily:"var(--font-serif)" }}>{courseTitle}</h3>
-                      <p className="text-[12px] text-[#000] m-0 mt-1 opacity-50" style={{ fontFamily:"var(--font-serif)" }}>{items.length} 道错题 · 最近：{items[0]?.date}</p>
-                    </div>
-                    <span className="text-[20px] text-[#000] opacity-40">→</span>
-                  </motion.button>
-                ))}
-              </div>
-            )}
-          </motion.div>
-        ) : (
-          <motion.div key="mi-detail" initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}>
-            <button onClick={() => setSelectedMistakeCourse(null)} className="flex items-center gap-2 mb-5 text-[14px] text-[#000] bg-transparent border-none cursor-pointer hover:opacity-70" style={{ fontFamily:"var(--font-serif)" }}>← {selectedMistakeCourse}</button>
-            <div className="space-y-4">
-              {mistakesByCourse.find(([c])=>c===selectedMistakeCourse)?.[1].map((m, i) => (
-                <motion.div key={m.id} className="p-5 bg-white rounded-[12px] border border-[#000] border-l-[4px] border-l-[#C04040]"
-                  initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} transition={{ delay:i*0.03 }}>
-                  <div className="flex items-start gap-3 mb-2">
-                    <span className="text-[13px] font-bold flex-shrink-0 mt-[3px]" style={{ fontFamily:"'Times New Roman',serif" }}>{i+1}.</span>
-                    <p className="text-[14px] text-[#000] font-bold m-0" style={{ fontFamily:"var(--font-serif)" }}>{m.exercise.question}</p>
-                  </div>
-                  <div className="ml-8 flex flex-col gap-1">
-                    <p className="text-[12px] text-[#000] m-0" style={{ fontFamily:"var(--font-serif)" }}>你的答案：<span className="text-[#C04040] font-bold">{m.wrongAnswer}</span></p>
-                    <p className="text-[12px] text-[#000] m-0" style={{ fontFamily:"var(--font-serif)" }}>正确答案：<span className="text-[#388e3c] font-bold">{Array.isArray(m.exercise.answer)?m.exercise.answer.join(", "):m.exercise.answer}</span></p>
-                    <p className="text-[10px] text-[#000] m-0 opacity-50" style={{ fontFamily:"var(--font-serif)" }}>{m.date}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-
-  // === Todos ===
   const pendingTodos = todos.filter((t) => !t.done);
   const doneTodos = todos.filter((t) => t.done);
-  const todosContent = (
-    <div className="max-w-2xl space-y-6">
-      <div className="flex gap-3">
-        <input type="text" placeholder="添加新的待办事项..."
-          onKeyDown={(e) => { if (e.key==="Enter" && e.currentTarget.value.trim()) { setTodos((p) => [{ id:`t${Date.now()}`, text:e.currentTarget.value.trim(), done:false }, ...p]); e.currentTarget.value = ""; } }}
-          className="flex-1 px-4 py-3 rounded-[10px] border border-[#000] text-[15px] text-[#000] outline-none" style={{ fontFamily: "var(--font-serif)" }} />
-      </div>
-      {pendingTodos.length > 0 && (
-        <div>
-          <h3 className="text-[15px] text-[#000] font-bold m-0 mb-3" style={{ fontFamily:"var(--font-serif)" }}>待完成 ({pendingTodos.length})</h3>
-          <div className="space-y-2">
-            {pendingTodos.map((td) => (
-              <motion.div key={td.id} className="flex items-center gap-3 p-4 bg-white rounded-[10px] border border-[#000] cursor-pointer" whileHover={{ x:2 }} onClick={() => toggleTodo(td.id)}>
-                <div className="w-5 h-5 rounded-[5px] border-2 border-[#000] flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[15px] text-[#000] m-0" style={{ fontFamily:"var(--font-serif)" }}>{td.text}</p>
-                  {td.course && <p className="text-[11px] text-[#000] m-0 mt-0.5 opacity-50" style={{ fontFamily:"var(--font-serif)" }}>{td.course}</p>}
-                </div>
-                {td.due && <span className="text-[12px] text-[#000] flex-shrink-0" style={{ fontFamily:"'Times New Roman',serif" }}>{td.due}</span>}
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      )}
-      {doneTodos.length > 0 && (
-        <div>
-          <h3 className="text-[15px] text-[#000] font-bold m-0 mb-3 opacity-40" style={{ fontFamily:"var(--font-serif)" }}>已完成 ({doneTodos.length})</h3>
-          <div className="space-y-1">
-            {doneTodos.map((td) => (
-              <div key={td.id} className="flex items-center gap-3 p-4 rounded-[10px] cursor-pointer opacity-40" onClick={() => toggleTodo(td.id)}>
-                <div className="w-5 h-5 rounded-[5px] bg-[#000] flex-shrink-0 flex items-center justify-center"><span className="text-white text-[12px]">✓</span></div>
-                <p className="text-[15px] text-[#000] line-through m-0" style={{ fontFamily:"var(--font-serif)" }}>{td.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
 
   return (
     <motion.div className="px-10 py-8 pb-12" initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.4 }}>
@@ -260,9 +149,153 @@ export default function DeskPage() {
       </div>
       <AnimatePresence mode="wait">
         <motion.div key={tab} initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }} transition={{ duration:0.2 }}>
-          {tab === "exercises" && exercisesContent}
-          {tab === "mistakes" && mistakesContent}
-          {tab === "todos" && todosContent}
+          {/* === TODOS === */}
+          {tab === "todos" && (
+            <div className="max-w-2xl space-y-6">
+              <div className="flex gap-3">
+                <input type="text" placeholder="添加新的待办事项..."
+                  onKeyDown={(e) => { if (e.key==="Enter" && e.currentTarget.value.trim()) { setTodos((p) => [{ id:`t${Date.now()}`, text:e.currentTarget.value.trim(), done:false }, ...p]); e.currentTarget.value = ""; } }}
+                  className="flex-1 px-4 py-3 rounded-[10px] border border-[#000] text-[15px] text-[#000] outline-none" style={{ fontFamily: "var(--font-serif)" }} />
+              </div>
+              {pendingTodos.length > 0 && (
+                <div>
+                  <h3 className="text-[15px] text-[#000] font-bold m-0 mb-3" style={{ fontFamily:"var(--font-serif)" }}>待完成 ({pendingTodos.length})</h3>
+                  <div className="space-y-2">
+                    {pendingTodos.map((td) => (
+                      <motion.div key={td.id} className="flex items-center gap-3 p-4 bg-white rounded-[10px] border border-[#000] cursor-pointer" whileHover={{ x:2 }} onClick={() => toggleTodo(td.id)}>
+                        <div className="w-5 h-5 rounded-[5px] border-2 border-[#000] flex-shrink-0" />
+                        <div className="flex-1 min-w-0"><p className="text-[15px] text-[#000] m-0" style={{ fontFamily:"var(--font-serif)" }}>{td.text}</p>
+                          {td.course && <p className="text-[11px] text-[#000] m-0 mt-0.5 opacity-50" style={{ fontFamily:"var(--font-serif)" }}>{td.course}</p>}</div>
+                        {td.due && <span className="text-[12px] text-[#000] flex-shrink-0" style={{ fontFamily:"'Times New Roman',serif" }}>{td.due}</span>}
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {doneTodos.length > 0 && (
+                <div>
+                  <h3 className="text-[15px] text-[#000] font-bold m-0 mb-3 opacity-40" style={{ fontFamily:"var(--font-serif)" }}>已完成 ({doneTodos.length})</h3>
+                  <div className="space-y-1">
+                    {doneTodos.map((td) => (
+                      <div key={td.id} className="flex items-center gap-3 p-4 rounded-[10px] cursor-pointer opacity-40" onClick={() => toggleTodo(td.id)}>
+                        <div className="w-5 h-5 rounded-[5px] bg-[#000] flex-shrink-0 flex items-center justify-center"><span className="text-white text-[12px]">✓</span></div>
+                        <p className="text-[15px] text-[#000] line-through m-0" style={{ fontFamily:"var(--font-serif)" }}>{td.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* === EXERCISES === */}
+          {tab === "exercises" && (
+            <div className="max-w-2xl">
+              <AnimatePresence mode="wait">
+                {!selectedCourse ? (
+                  <motion.div key="ex-courses" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}>
+                    <div className="space-y-3">
+                      {exercisesByCourse.map(([courseTitle, exs]) => (
+                        <motion.button key={courseTitle} initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }}
+                          onClick={() => setSelectedCourse(courseTitle)}
+                          className="w-full flex items-center justify-between p-5 bg-white rounded-[14px] border border-[#000] cursor-pointer hover:bg-[#f9f9f9] text-left"
+                          whileHover={{ y:-1, boxShadow:"0 2px 8px rgba(0,0,0,0.06)" }}>
+                          <div><h3 className="text-[16px] text-[#000] font-bold m-0" style={{ fontFamily:"var(--font-serif)" }}>{courseTitle}</h3>
+                            <p className="text-[12px] text-[#000] m-0 mt-1 opacity-50" style={{ fontFamily:"var(--font-serif)" }}>{exs.length} 道习题</p></div>
+                          <span className="text-[20px] text-[#000] opacity-40">→</span>
+                        </motion.button>
+                      ))}
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div key="ex-questions" initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}>
+                    <button onClick={() => setSelectedCourse(null)} className="flex items-center gap-2 mb-5 text-[14px] text-[#000] bg-transparent border-none cursor-pointer hover:opacity-70" style={{ fontFamily:"var(--font-serif)" }}>← {selectedCourse}</button>
+                    <div className="space-y-4">{exercisesByCourse.find(([c])=>c===selectedCourse)?.[1].map((ex,i)=> renderQuestion(ex,i))}</div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+
+          {/* === MISTAKES === */}
+          {tab === "mistakes" && (
+            <div className="max-w-2xl">
+              <AnimatePresence mode="wait">
+                {!selectedMistakeCourse ? (
+                  <motion.div key="mi-courses" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}>
+                    {mistakesByCourse.length === 0 ? (
+                      <p className="text-[#000] py-8 opacity-50" style={{ fontFamily:"var(--font-serif)" }}>暂无错题，继续加油！</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {mistakesByCourse.map(([courseTitle, items]) => (
+                          <motion.button key={courseTitle} initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }}
+                            onClick={() => setSelectedMistakeCourse(courseTitle)}
+                            className="w-full flex items-center justify-between p-5 bg-white rounded-[14px] border border-[#000] border-l-[4px] border-l-[#C04040] cursor-pointer hover:bg-[#f9f9f9] text-left"
+                            whileHover={{ y:-1, boxShadow:"0 2px 8px rgba(0,0,0,0.06)" }}>
+                            <div><h3 className="text-[16px] text-[#000] font-bold m-0" style={{ fontFamily:"var(--font-serif)" }}>{courseTitle}</h3>
+                              <p className="text-[12px] text-[#000] m-0 mt-1 opacity-50" style={{ fontFamily:"var(--font-serif)" }}>{items.length} 道错题 · 最近：{items[0]?.date}</p></div>
+                            <span className="text-[20px] text-[#000] opacity-40">→</span>
+                          </motion.button>
+                        ))}
+                      </div>
+                    )}
+                  </motion.div>
+                ) : (
+                  <motion.div key="mi-detail" initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}>
+                    <button onClick={() => setSelectedMistakeCourse(null)} className="flex items-center gap-2 mb-5 text-[14px] text-[#000] bg-transparent border-none cursor-pointer hover:opacity-70" style={{ fontFamily:"var(--font-serif)" }}>← {selectedMistakeCourse}</button>
+                    <div className="space-y-4">
+                      {mistakesByCourse.find(([c])=>c===selectedMistakeCourse)?.[1].map((m, i) => (
+                        <motion.div key={m.id} className="p-5 bg-white rounded-[12px] border border-[#000] border-l-[4px] border-l-[#C04040]" initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} transition={{ delay:i*0.03 }}>
+                          <div className="flex items-start gap-3 mb-2">
+                            <span className="text-[13px] font-bold flex-shrink-0 mt-[3px]" style={{ fontFamily:"'Times New Roman',serif" }}>{i+1}.</span>
+                            <p className="text-[14px] text-[#000] font-bold m-0" style={{ fontFamily:"var(--font-serif)" }}>{m.exercise.question}</p>
+                          </div>
+                          <div className="ml-8 flex flex-col gap-1">
+                            <p className="text-[12px] text-[#000] m-0" style={{ fontFamily:"var(--font-serif)" }}>你的答案：<span className="text-[#C04040] font-bold">{m.wrongAnswer}</span></p>
+                            <p className="text-[12px] text-[#000] m-0" style={{ fontFamily:"var(--font-serif)" }}>正确答案：<span className="text-[#388e3c] font-bold">{Array.isArray(m.exercise.answer)?m.exercise.answer.join(", "):m.exercise.answer}</span></p>
+                            <p className="text-[10px] text-[#000] m-0 opacity-50" style={{ fontFamily:"var(--font-serif)" }}>{m.date}</p>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+
+          {/* === DIARY === */}
+          {tab === "diary" && (
+            <div className="max-w-2xl space-y-6">
+              {/* Write new */}
+              <div className="p-5 bg-white rounded-[14px] border border-[#000] space-y-3">
+                <input type="text" value={newDiaryTitle} onChange={(e) => setNewDiaryTitle(e.target.value)}
+                  placeholder="日记标题..." className="w-full px-4 py-2.5 rounded-[8px] border border-[#000] text-[15px] text-[#000] outline-none font-bold"
+                  style={{ fontFamily:"var(--font-serif)" }} />
+                <textarea value={newDiaryContent} onChange={(e) => setNewDiaryContent(e.target.value)}
+                  placeholder="写下你的学习心得..." rows={4}
+                  className="w-full px-4 py-3 rounded-[8px] border border-[#000] text-[14px] text-[#000] outline-none resize-none"
+                  style={{ fontFamily:"var(--font-serif)" }} />
+                <button onClick={addDiary} disabled={!newDiaryTitle.trim() || !newDiaryContent.trim()}
+                  className="px-6 py-2.5 rounded-[8px] text-[14px] font-bold border-none cursor-pointer bg-[#000] text-white hover:bg-[#333] disabled:opacity-30 disabled:cursor-not-allowed"
+                  style={{ fontFamily:"var(--font-serif)" }}>发布日记</button>
+              </div>
+
+              {/* Past entries */}
+              <div className="space-y-4">
+                {diary.map((entry) => (
+                  <motion.div key={entry.id} className="p-5 bg-white rounded-[12px] border border-[#000]"
+                    initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }}>
+                    <div className="flex items-baseline justify-between mb-3">
+                      <h3 className="text-[17px] text-[#000] font-bold m-0" style={{ fontFamily:"var(--font-serif)" }}>{entry.title}</h3>
+                      <span className="text-[12px] text-[#000] opacity-50 flex-shrink-0" style={{ fontFamily:"'Times New Roman',serif" }}>{entry.date}</span>
+                    </div>
+                    <p className="text-[14px] text-[#000] leading-relaxed m-0" style={{ fontFamily:"var(--font-serif)", textIndent:"2em" }}>{entry.content}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
         </motion.div>
       </AnimatePresence>
     </motion.div>

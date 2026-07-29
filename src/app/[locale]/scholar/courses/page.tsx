@@ -1,6 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+"use client";
+
+import { useMemo, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslation } from "@/i18n/useTranslation";
 import { motion } from "framer-motion";
 import { courses as allCourses } from "@/data/courses";
@@ -10,16 +13,26 @@ import CourseListCard from "@/components/scholar/CourseListCard";
 export default function CoursesPage() {
   const { t, locale } = useTranslation();
   const s = t.scholar as Record<string, string>;
+  const searchParams = useSearchParams();
+  const urlIds = searchParams?.get("ids") || "";
+  const urlCat = searchParams?.get("cat") || "";
+  const isModuleView = !!urlIds;
+  // Module view: only show these specific course IDs
+  const moduleIds = useMemo(() => urlIds ? urlIds.split(",").filter(Boolean) : [], [urlIds]);
 
   const [filter, setFilter] = useState<FilterState>({
-    category: "all",
+    category: urlCat || "all",
     difficulty: "all",
     status: "all",
     sort: "rating",
   });
 
+  useEffect(() => { setFilter((prev) => ({ ...prev, category: urlCat || "all" })); }, [urlCat]);
+
   const filtered = useMemo(() => {
-    let result = [...allCourses];
+    let result = isModuleView
+      ? allCourses.filter((c) => moduleIds.includes(c.id))
+      : [...allCourses];
 
     // Filter
     if (filter.category !== "all") {
