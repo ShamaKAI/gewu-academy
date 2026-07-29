@@ -2,102 +2,161 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useTranslation } from "@/i18n/useTranslation";
 import { motion, AnimatePresence } from "framer-motion";
 import { IconSearch, IconBell, IconMail, IconClock, IconCalendar, IconArrowRight } from "@/components/scholar/Icons";
 import CourseSection from "@/components/scholar/CourseSection";
 import type { CourseData } from "@/components/scholar/CourseCard";
 import { courses as allCourses } from "@/data/courses";
+import { newsItems } from "@/data/news";
 
 /* ============================================================
    格物学院 · 学子端 — 主页面
-   设计规范：黑白灰水墨新中式，三栏(侧栏+主内容+手机预览)
-   搜索功能：搜索典籍页课程
+   模块查看更多 → 书院内钻取（纵向列表+搜索），
+   点击具体课程 → 典籍详情页。
+   近期活动数据打通院讯。
    ============================================================ */
 
-/* ---------- Mock 封面图 — picsum 文化/书籍主题 ---------- */
+type DrillKey = "my" | "featured" | "required" | "selection" | "mentor" | null;
+
+interface ModuleInfo { key: DrillKey; title: string; courses: CourseData[]; }
+
 const COVERS = {
-  daxue:    "https://picsum.photos/seed/classics-book/400/300",
-  chuanxi:  "https://picsum.photos/seed/philosophy-scroll/400/300",
-  jinrong:  "https://picsum.photos/seed/finance-chart/400/300",
-  sunzi:    "https://picsum.photos/seed/strategy-general/400/300",
-  lunyu:    "https://picsum.photos/seed/confucius-analects/400/300",
+  daxue: "https://picsum.photos/seed/classics-book/400/300",
+  chuanxi: "https://picsum.photos/seed/philosophy-scroll/400/300",
+  jinrong: "https://picsum.photos/seed/finance-chart/400/300",
+  sunzi: "https://picsum.photos/seed/strategy-general/400/300",
+  lunyu: "https://picsum.photos/seed/confucius-analects/400/300",
   fengxian: "https://picsum.photos/seed/risk-management/400/300",
-  shuju:    "https://picsum.photos/seed/data-science/400/300",
-  daode:    "https://picsum.photos/seed/tao-te-ching/400/300",
-  python:   "https://picsum.photos/seed/python-quant/400/300",
-  shijing:  "https://picsum.photos/seed/poetry-classic/400/300",
-  tongji:   "https://picsum.photos/seed/statistics-learn/400/300",
+  shuju: "https://picsum.photos/seed/data-science/400/300",
+  daode: "https://picsum.photos/seed/tao-te-ching/400/300",
+  python: "https://picsum.photos/seed/python-quant/400/300",
+  shijing: "https://picsum.photos/seed/poetry-classic/400/300",
+  tongji: "https://picsum.photos/seed/statistics-learn/400/300",
 };
 
-/* ---------- Mock 数据 ---------- */
 const myCourses: CourseData[] = [
-  { id: "great-learning", title: "《大学》精读",     category: "伦理文化", cover: COVERS.daxue,    progress: 78, rating: 4.9, mentor: "王阳明" },
-  { id: "risk-mgmt",       title: "风险管理基础",     category: "保险精算", cover: COVERS.fengxian, progress: 60, rating: 4.5, mentor: "陈省身" },
-  { id: "data-science",    title: "数据分析导论",     category: "数据科学", cover: COVERS.shuju,    progress: 45, rating: 4.3, mentor: "吴思远" },
-  { id: "fin-math",        title: "金融数学建模",     category: "金融工程", cover: COVERS.jinrong,  progress: 92, rating: 4.7, mentor: "李归" },
+  { id: "great-learning", title: "《大学》精读", category: "伦理文化", cover: COVERS.daxue, progress: 78, rating: 4.9, mentor: "王阳明" },
+  { id: "risk-mgmt", title: "风险管理基础", category: "保险精算", cover: COVERS.fengxian, progress: 60, rating: 4.5, mentor: "陈省身" },
+  { id: "data-science", title: "数据分析导论", category: "数据科学", cover: COVERS.shuju, progress: 45, rating: 4.3, mentor: "吴思远" },
+  { id: "fin-math", title: "金融数学建模", category: "金融工程", cover: COVERS.jinrong, progress: 92, rating: 4.7, mentor: "李归" },
 ];
-
 const featuredCourses: CourseData[] = [
-  { id: "great-learning", title: "《大学》精读",         category: "伦理文化", cover: COVERS.daxue,    progress: 78, rating: 4.9, mentor: "王阳明" },
-  { id: "lunyu",          title: "《传习录》研读",       category: "心学经典", cover: COVERS.chuanxi,  progress: 65, rating: 4.8, mentor: "陆九渊" },
-  { id: "fin-math",       title: "金融数学建模",         category: "金融工程", cover: COVERS.jinrong,  progress: 92, rating: 4.7, mentor: "陈省身" },
-  { id: "sunzi",          title: "《孙子兵法》与决策",   category: "战略思维", cover: COVERS.sunzi,    progress: 55, rating: 4.7, mentor: "孙武" },
+  { id: "great-learning", title: "《大学》精读", category: "伦理文化", cover: COVERS.daxue, progress: 78, rating: 4.9, mentor: "王阳明" },
+  { id: "lunyu", title: "《传习录》研读", category: "心学经典", cover: COVERS.chuanxi, progress: 65, rating: 4.8, mentor: "陆九渊" },
+  { id: "fin-math", title: "金融数学建模", category: "金融工程", cover: COVERS.jinrong, progress: 92, rating: 4.7, mentor: "陈省身" },
+  { id: "sunzi", title: "《孙子兵法》与决策", category: "战略思维", cover: COVERS.sunzi, progress: 55, rating: 4.7, mentor: "孙武" },
 ];
-
 const requiredCourses: CourseData[] = [
-  { id: "lunyu",          title: "《论语》精讲",         category: "伦理文化", cover: COVERS.lunyu,    progress: 82, required: true },
-  { id: "risk-mgmt",      title: "风险管理基础",         category: "保险精算", cover: COVERS.fengxian, progress: 60, required: true },
-  { id: "data-science",   title: "数据分析导论",         category: "数据科学", cover: COVERS.shuju,    progress: 45, required: true },
+  { id: "lunyu", title: "《论语》精讲", category: "伦理文化", cover: COVERS.lunyu, progress: 82, required: true },
+  { id: "risk-mgmt", title: "风险管理基础", category: "保险精算", cover: COVERS.fengxian, progress: 60, required: true },
+  { id: "data-science", title: "数据分析导论", category: "数据科学", cover: COVERS.shuju, progress: 45, required: true },
 ];
-
 const selectionCourses: CourseData[] = [
-  { id: "daodejing",      title: "《道德经》现代解读",   category: "道家哲学", cover: COVERS.daode,    progress: 70, rating: 4.4 },
-  { id: "python-quant",   title: "Python 与量化投资",    category: "编程应用", cover: COVERS.python,   progress: 50, rating: 4.3 },
-  { id: "shijing",        title: "《诗经》鉴赏",         category: "文学艺术", cover: COVERS.shijing,  progress: 38, rating: 4.2 },
-  { id: "stats-ml",       title: "统计学习基础",         category: "数据科学", cover: COVERS.tongji,   progress: 88, rating: 4.1 },
+  { id: "daodejing", title: "《道德经》现代解读", category: "道家哲学", cover: COVERS.daode, progress: 70, rating: 4.4 },
+  { id: "python-quant", title: "Python 与量化投资", category: "编程应用", cover: COVERS.python, progress: 50, rating: 4.3 },
+  { id: "shijing", title: "《诗经》鉴赏", category: "文学艺术", cover: COVERS.shijing, progress: 38, rating: 4.2 },
+  { id: "stats-ml", title: "统计学习基础", category: "数据科学", cover: COVERS.tongji, progress: 88, rating: 4.1 },
 ];
-
 const mentorCourses: CourseData[] = [
-  { id: "wealth-foundation",    title: "财富管理的底层逻辑",   category: "理财规划", cover: "https://picsum.photos/seed/wealth-foundation/400/300",   mentor: "栖云先生" },
-  { id: "family-legacy",       title: "家族财富传承",         category: "理财规划", cover: "https://picsum.photos/seed/family-legacy/400/300",      mentor: "栖云先生" },
-  { id: "family-wealth-plan",  title: "家庭财富规划",         category: "理财规划", cover: "https://picsum.photos/seed/family-plan/400/300",       mentor: "知微先生" },
-  { id: "women-wealth",        title: "女性财富成长",         category: "理财规划", cover: "https://picsum.photos/seed/women-wealth/400/300",       mentor: "知微先生" },
-  { id: "global-allocation",   title: "全球资产配置",         category: "投资管理", cover: "https://picsum.photos/seed/global-alloc/400/300",      mentor: "观澜先生" },
-  { id: "value-investing",     title: "长期价值投资",         category: "投资管理", cover: "https://picsum.photos/seed/long-value/400/300",        mentor: "观澜先生" },
-  { id: "corp-wealth-mgmt",    title: "企业财富管理",         category: "企业理财", cover: "https://picsum.photos/seed/corp-wealth/400/300",       mentor: "抱朴先生" },
-  { id: "succession-plan",     title: "企业传承规划",         category: "企业理财", cover: "https://picsum.photos/seed/succession/400/300",        mentor: "抱朴先生" },
-  { id: "ai-wealth-mgmt",      title: "AI时代的财富管理",     category: "科技金融", cover: "https://picsum.photos/seed/ai-wealth/400/300",         mentor: "清衡先生" },
-  { id: "first-wealth-plan",   title: "年轻人的第一份财富规划", category: "理财规划", cover: "https://picsum.photos/seed/first-plan/400/300",      mentor: "清衡先生" },
+  { id: "wealth-foundation", title: "财富管理的底层逻辑", category: "理财规划", cover: "https://picsum.photos/seed/wealth-foundation/400/300", mentor: "栖云先生" },
+  { id: "family-legacy", title: "家族财富传承", category: "理财规划", cover: "https://picsum.photos/seed/family-legacy/400/300", mentor: "栖云先生" },
+  { id: "family-wealth-plan", title: "家庭财富规划", category: "理财规划", cover: "https://picsum.photos/seed/family-plan/400/300", mentor: "知微先生" },
+  { id: "women-wealth", title: "女性财富成长", category: "理财规划", cover: "https://picsum.photos/seed/women-wealth/400/300", mentor: "知微先生" },
+  { id: "global-allocation", title: "全球资产配置", category: "投资管理", cover: "https://picsum.photos/seed/global-alloc/400/300", mentor: "观澜先生" },
+  { id: "value-investing", title: "长期价值投资", category: "投资管理", cover: "https://picsum.photos/seed/long-value/400/300", mentor: "观澜先生" },
+  { id: "corp-wealth-mgmt", title: "企业财富管理", category: "企业理财", cover: "https://picsum.photos/seed/corp-wealth/400/300", mentor: "抱朴先生" },
+  { id: "succession-plan", title: "企业传承规划", category: "企业理财", cover: "https://picsum.photos/seed/succession/400/300", mentor: "抱朴先生" },
+  { id: "ai-wealth-mgmt", title: "AI时代的财富管理", category: "科技金融", cover: "https://picsum.photos/seed/ai-wealth/400/300", mentor: "清衡先生" },
+  { id: "first-wealth-plan", title: "年轻人的第一份财富规划", category: "理财规划", cover: "https://picsum.photos/seed/first-plan/400/300", mentor: "清衡先生" },
 ];
 
-/* ---------- 原有小组件 ---------- */
+/* ── Activities — synced from news data (latest 4 activities) ── */
+const activityData = newsItems.filter((n) => n.category === "activity").slice(0, 4);
+
 function DataStatCard({ icon, value, label, sub }: { icon: React.ReactNode; value: string; label: string; sub: string }) {
   return (
-    <motion.div className="bg-[#f7f7f7] rounded-[12px] p-5 cursor-pointer"
-      whileHover={{ y: -2, boxShadow: "0 1px 6px rgba(0,0,0,0.05)", transition: { duration: 0.2 } }}
-      style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.03)" }}>
+    <motion.div className="bg-[#f7f7f7] rounded-[12px] p-5 cursor-pointer border border-[#000]"
+      whileHover={{ y: -2, boxShadow: "0 1px 6px rgba(0,0,0,0.05)" }}>
       <div className="text-[#000] mb-3">{icon}</div>
-      <p className="text-[28px] text-[#000] font-bold m-0 leading-none" style={{ fontFamily: "var(--font-display)" }}>{value}</p>
-      <p className="text-[13px] text-[#333] font-bold m-0 mt-1" style={{ fontFamily: "var(--font-serif)" }}>{label}</p>
+      <p className="text-[28px] text-[#000] font-bold m-0 leading-none" style={{ fontFamily: "'Times New Roman', serif" }}>{value}</p>
+      <p className="text-[13px] text-[#000] font-bold m-0 mt-1" style={{ fontFamily: "var(--font-serif)" }}>{label}</p>
       <p className="text-[11px] text-[#000] m-0 mt-0.5" style={{ fontFamily: "var(--font-serif)" }}>{sub}</p>
     </motion.div>
   );
 }
 
-function ActivityCard({ date, month, title, time, location, speaker }: { date: string; month: string; title: string; time: string; location: string; speaker: string }) {
+function ActivityCard({ newsItem }: { newsItem: typeof newsItems[number] }) {
+  const d = new Date(newsItem.date);
   return (
-    <motion.div className="flex gap-4 p-4 bg-white rounded-[12px] border border-[#eee] cursor-pointer"
-      whileHover={{ y: -2, borderColor: "#ccc", boxShadow: "0 1px 6px rgba(0,0,0,0.05)", transition: { duration: 0.2 } }}>
-      <div className="w-12 h-12 bg-[#f7f7f7] rounded-[10px] flex flex-col items-center justify-center flex-shrink-0 border border-[#eee]">
-        <span className="text-[18px] text-[#000] font-bold leading-none" style={{ fontFamily: "var(--font-display)" }}>{date}</span>
-        <span className="text-[10px] text-[#000] mt-0.5 font-bold" style={{ fontFamily: "var(--font-serif)" }}>{month}</span>
+    <motion.div className="flex gap-4 p-4 bg-white rounded-[12px] border border-[#000] cursor-pointer"
+      whileHover={{ y: -2, boxShadow: "0 1px 6px rgba(0,0,0,0.05)" }}>
+      <img src={newsItem.cover} alt={newsItem.title} className="w-[80px] h-[60px] rounded-[8px] object-cover flex-shrink-0" />
+      <div className="flex-1 min-w-0">
+        <h4 className="text-[15px] text-[#000] font-bold m-0 mb-1" style={{ fontFamily: "var(--font-serif)" }}>{newsItem.title}</h4>
+        <p className="text-[12px] text-[#000] m-0 leading-relaxed line-clamp-1" style={{ fontFamily: "var(--font-serif)" }}>{newsItem.summary}</p>
       </div>
-      <div className="flex-1">
-        <h4 className="text-[14px] text-[#333] font-bold m-0 mb-1" style={{ fontFamily: "var(--font-serif)" }}>{title}</h4>
-        <p className="text-[12px] text-[#000] m-0 leading-relaxed" style={{ fontFamily: "var(--font-serif)" }}>{time} | {location} | {speaker}</p>
+      <span className="text-[12px] text-[#000] self-center flex-shrink-0 opacity-50" style={{ fontFamily: "'Times New Roman', serif" }}>
+        {d.getMonth() + 1}/{d.getDate()}
+      </span>
+    </motion.div>
+  );
+}
+
+/* ── Inline drill-down course list ── */
+function DrillDownList({ title, courses, locale, onBack }: { title: string; courses: CourseData[]; locale: string; onBack: () => void }) {
+  const router = useRouter();
+  const [search, setSearch] = useState("");
+  const filtered = useMemo(() => {
+    if (!search.trim()) return courses;
+    const q = search.trim().toLowerCase();
+    return courses.filter((c) => c.title.toLowerCase().includes(q) || c.category?.toLowerCase().includes(q) || (c.mentor || "").toLowerCase().includes(q));
+  }, [search, courses]);
+
+  return (
+    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }}>
+      <button onClick={onBack} className="flex items-center gap-2 mb-6 text-[14px] text-[#000] bg-transparent border-none cursor-pointer hover:opacity-70" style={{ fontFamily: "var(--font-serif)" }}>← 返回书院首页</button>
+
+      <h1 className="text-[28px] text-[#000] tracking-[calc(var(--ls-scale)*3px)] font-bold m-0 mb-2" style={{ fontFamily: "var(--font-serif)" }}>{title}</h1>
+      <p className="text-[13px] text-[#000] m-0 mb-6 opacity-50" style={{ fontFamily: "var(--font-serif)" }}>{filtered.length} 门课程</p>
+
+      {/* Search bar */}
+      <div className="relative w-full mb-6 max-w-xl">
+        <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="搜索课程名称、导师..."
+          className="w-full h-[42px] pl-5 pr-12 border border-[#000] rounded-[10px] text-[14px] text-[#000] outline-none bg-white"
+          style={{ fontFamily: "var(--font-serif)" }} />
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#000]"><IconSearch /></span>
       </div>
-      <span className="text-[#ccc] self-center"><IconArrowRight /></span>
+
+      <div className="flex flex-col gap-3 max-w-2xl">
+        {filtered.length === 0 ? (
+          <p className="text-[#000] py-10 opacity-50 text-center" style={{ fontFamily: "var(--font-serif)" }}>未找到匹配的课程</p>
+        ) : (
+          filtered.map((c, i) => (
+            <motion.button key={c.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
+              onClick={() => router.push(`/${locale}/scholar/courses/${c.id}`)}
+              className="flex items-center gap-5 p-4 bg-white rounded-[12px] border border-[#000] cursor-pointer hover:bg-[#f9f9f9] text-left transition-colors"
+              whileHover={{ y: -1, boxShadow: "0 1px 6px rgba(0,0,0,0.05)" }}>
+              <img src={c.cover} alt={c.title} className="w-[120px] h-[80px] rounded-[8px] object-cover flex-shrink-0 border border-[#eee]" />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="text-[16px] text-[#000] font-bold m-0" style={{ fontFamily: "var(--font-serif)" }}>{c.title}</h3>
+                  {c.required && <span className="text-[10px] px-2 py-[2px] rounded-[4px] font-bold bg-[#C04040] text-white" style={{ fontFamily: "var(--font-serif)" }}>必修</span>}
+                </div>
+                <p className="text-[12px] text-[#000] m-0 opacity-50" style={{ fontFamily: "var(--font-serif)" }}>{c.mentor} · {c.category}</p>
+                {c.progress !== undefined && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="flex-1 h-[4px] bg-[#eee] rounded-full max-w-[160px]"><div className="h-full bg-[#000] rounded-full" style={{ width: `${c.progress}%` }} /></div>
+                    <span className="text-[10px] text-[#000]" style={{ fontFamily: "'Times New Roman', serif" }}>{c.progress}%</span>
+                  </div>
+                )}
+              </div>
+              <span className="text-[#000] text-[20px] opacity-30 flex-shrink-0">→</span>
+            </motion.button>
+          ))
+        )}
+      </div>
     </motion.div>
   );
 }
@@ -108,31 +167,16 @@ export default function ScholarHome() {
   const router = useRouter();
   const s = t.scholar as Record<string, string>;
   const [search, setSearch] = useState("");
-  const [searchFocused, setSearchFocused] = useState(false);
+  const [drillDown, setDrillDown] = useState<DrillKey>(null);
   const username = "SHA";
 
-  // Dynamic greeting based on local time
-  const getGreeting = () => {
-    const h = new Date().getHours();
-    if (h < 6) return "晚安";
-    if (h < 12) return "早安";
-    if (h < 18) return "午安";
-    return "晚安";
-  };
+  const getGreeting = () => { const h = new Date().getHours(); if (h < 6) return "晚安"; if (h < 12) return "早安"; if (h < 18) return "午安"; return "晚安"; };
   const greetingWord = getGreeting();
 
-  // Search courses from the courses list
   const searchResults = useMemo(() => {
     if (!search.trim()) return [];
     const q = search.trim().toLowerCase();
-    return allCourses
-      .filter((c) =>
-        c.title.toLowerCase().includes(q) ||
-        c.category.toLowerCase().includes(q) ||
-        c.instructor.toLowerCase().includes(q) ||
-        c.description.toLowerCase().includes(q)
-      )
-      .slice(0, 6); // max 6 results in dropdown
+    return allCourses.filter((c) => c.title.toLowerCase().includes(q) || c.category.toLowerCase().includes(q) || c.instructor.toLowerCase().includes(q) || c.description.toLowerCase().includes(q)).slice(0, 6);
   }, [search]);
 
   const stats = [
@@ -142,128 +186,99 @@ export default function ScholarHome() {
     { icon: <IconBell />, value: s.hero_rank_val, label: s.hero_rank, sub: "本院" },
   ];
 
-  const activities = [
-    { date: "25", month: "五月", title: "《论语》研讨会", time: "14:00-16:00", location: "格物书院·明理堂", speaker: "主讲：王老师" },
-    { date: "28", month: "五月", title: "风险管理案例分享会", time: "10:00-12:00", location: "线上会议", speaker: "主讲：陈师者" },
+  const modules: { key: DrillKey; title: string; moreLabel: string; courses: CourseData[]; cols: 2|3|4; variant: "large"|"medium"|"small"; showRating?: boolean; showMentor?: boolean; showBadge?: boolean; badgeLabel?: string }[] = [
+    { key: "my", title: s.courses_title, moreLabel: s.courses_more, courses: myCourses, cols: 4, variant: "small" },
+    { key: "featured", title: s.featured_title, moreLabel: s.featured_more, courses: featuredCourses, cols: 2, variant: "large", showRating: true, showMentor: true },
+    { key: "required", title: s.required_title, moreLabel: s.required_more, courses: requiredCourses, cols: 3, variant: "medium", showBadge: true, badgeLabel: s.required_badge },
+    { key: "selection", title: s.selection_title, moreLabel: s.selection_more, courses: selectionCourses, cols: 4, variant: "small" },
+    { key: "mentor", title: "所有课程", moreLabel: "查看全部", courses: mentorCourses, cols: 4, variant: "small" },
   ];
 
+  const activeModule = drillDown ? modules.find((m) => m.key === drillDown) : null;
+
   return (
-    <motion.div className="px-10 py-8 pb-12" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}>
-      {/* ====== Header ====== */}
-      <div className="flex items-start justify-between mb-8">
-        <div>
-          <h1 className="text-[28px] text-[#000] tracking-[calc(var(--ls-scale)*3px)] font-bold m-0 leading-tight" style={{ fontFamily: "var(--font-serif)" }}>
-            {greetingWord}，
-            <span style={{ fontFamily: "'Times New Roman', serif" }}>{username}</span>
-          </h1>
-          <p className="text-[14px] text-[#000] m-0 mt-1.5" style={{ fontFamily: "var(--font-serif)" }}>{s.hero_subtitle}</p>
-        </div>
-        <div className="flex items-center gap-4 mt-1">
-          <span className="text-[#000] cursor-pointer hover:text-[#333] transition-colors"><IconBell /></span>
-          <span className="text-[#000] cursor-pointer hover:text-[#333] transition-colors"><IconMail /></span>
-          <div className="flex items-center gap-2 cursor-pointer hover:opacity-80">
-            <div className="w-8 h-8 rounded-full bg-[#ddd] flex items-center justify-center text-[12px] text-[#333] font-bold" style={{ fontFamily: "'Times New Roman', serif" }}>{username[0]}</div>
-            <span className="text-[13px] text-[#000] font-bold" style={{ fontFamily: "'Times New Roman', serif" }}>{username}</span>
-          </div>
-        </div>
-      </div>
+    <motion.div className="px-10 py-8 pb-12" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+      <AnimatePresence mode="wait">
+        {activeModule ? (
+          /* ====== DRILL-DOWN VIEW ====== */
+          <DrillDownList key={activeModule.key} title={activeModule.title} courses={activeModule.courses} locale={locale} onBack={() => setDrillDown(null)} />
+        ) : (
+          /* ====== MAIN VIEW ====== */
+          <motion.div key="main" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            {/* Header */}
+            <div className="flex items-start justify-between mb-8">
+              <div>
+                <h1 className="text-[28px] text-[#000] tracking-[calc(var(--ls-scale)*3px)] font-bold m-0 leading-tight" style={{ fontFamily: "var(--font-serif)" }}>
+                  {greetingWord}，<span style={{ fontFamily: "'Times New Roman', serif" }}>{username}</span>
+                </h1>
+                <p className="text-[14px] text-[#000] m-0 mt-1.5" style={{ fontFamily: "var(--font-serif)" }}>{s.hero_subtitle}</p>
+              </div>
+              <div className="flex items-center gap-4 mt-1">
+                <span className="text-[#000] cursor-pointer hover:opacity-70"><IconBell /></span>
+                <span className="text-[#000] cursor-pointer hover:opacity-70"><IconMail /></span>
+                <div className="flex items-center gap-2 cursor-pointer hover:opacity-80">
+                  <div className="w-8 h-8 rounded-full bg-[#ddd] flex items-center justify-center text-[12px] font-bold" style={{ fontFamily: "'Times New Roman', serif", color: "#000" }}>{username[0]}</div>
+                  <span className="text-[13px] text-[#000] font-bold" style={{ fontFamily: "'Times New Roman', serif" }}>{username}</span>
+                </div>
+              </div>
+            </div>
 
-      {/* Search — with course search dropdown */}
-      <div className="relative w-full mb-8">
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          onFocus={() => setSearchFocused(true)}
-          onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
-          placeholder={s.search_placeholder}
-          className="w-full h-[46px] pl-5 pr-12 border border-[#cccccc] rounded-[12px] text-[14px] text-[#333] outline-none bg-white transition-colors focus:border-[#666]"
-          style={{ fontFamily: "var(--font-serif)" }}
-        />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#000] cursor-pointer"><IconSearch /></span>
+            {/* Search */}
+            <div className="relative w-full mb-8">
+              <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={s.search_placeholder}
+                className="w-full h-[46px] pl-5 pr-12 border border-[#000] rounded-[12px] text-[14px] text-[#000] outline-none bg-white"
+                style={{ fontFamily: "var(--font-serif)" }} />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#000]"><IconSearch /></span>
+              <AnimatePresence>
+                {searchResults.length > 0 && (
+                  <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                    className="absolute top-full left-0 right-0 mt-1 bg-white rounded-[12px] border border-[#000] shadow-lg z-50 overflow-hidden">
+                    {searchResults.map((course) => (
+                      <button key={course.id} onClick={() => { router.push(`/${locale}/scholar/courses/${course.id}`); setSearch(""); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-left border-b border-[#eee] last:border-b-0 bg-transparent cursor-pointer hover:bg-[#f9f9f9]">
+                        <img src={course.coverImage} alt="" className="w-10 h-10 rounded-[6px] object-cover flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[14px] text-[#000] font-bold m-0 truncate" style={{ fontFamily: "var(--font-serif)" }}>{course.title}</p>
+                          <p className="text-[11px] text-[#000] m-0" style={{ fontFamily: "var(--font-serif)" }}>{course.instructor} · {course.category} · ★{course.rating}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              {search.trim() && searchResults.length === 0 && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-[12px] border border-[#000] shadow-lg z-50 p-5 text-center">
+                  <p className="text-[13px] text-[#000] m-0" style={{ fontFamily: "var(--font-serif)" }}>未找到相关课程</p>
+                </div>
+              )}
+            </div>
 
-        {/* Search results dropdown */}
-        <AnimatePresence>
-          {searchResults.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15 }}
-              className="absolute top-full left-0 right-0 mt-1 bg-white rounded-[12px] border border-[#ddd] shadow-lg z-50 overflow-hidden"
-              style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.08)" }}
-            >
-              {searchResults.map((course) => (
-                <button
-                  key={course.id}
-                  onClick={() => {
-                    router.push(`/${locale}/scholar/courses/${course.id}`);
-                    setSearch("");
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left border-b border-[#f0f0f0] last:border-b-0 bg-transparent cursor-pointer hover:bg-[#f9f9f9] transition-colors"
-                >
-                  <img
-                    src={course.coverImage}
-                    alt=""
-                    className="w-10 h-10 rounded-[6px] object-cover flex-shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[14px] text-[#333] font-bold m-0 truncate" style={{ fontFamily: "var(--font-serif)" }}>
-                      {course.title}
-                    </p>
-                    <p className="text-[11px] text-[#000] m-0" style={{ fontFamily: "var(--font-serif)" }}>
-                      {course.instructor} · {course.category} · ★{course.rating}
-                    </p>
-                  </div>
-                  <span className="text-[11px] text-[#000] flex-shrink-0" style={{ fontFamily: "var(--font-display)" }}>
-                    {course.duration}
-                  </span>
-                </button>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
+            {/* Stats */}
+            <div className="grid grid-cols-4 gap-4 mb-10">
+              {stats.map((st) => <DataStatCard key={st.label} icon={st.icon} value={st.value} label={st.label} sub={st.sub} />)}
+            </div>
 
-        {/* No results */}
-        {search.trim() && searchResults.length === 0 && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-[12px] border border-[#ddd] shadow-lg z-50 p-5 text-center">
-            <p className="text-[13px] text-[#000] m-0" style={{ fontFamily: "var(--font-serif)" }}>
-              未找到相关课程
-            </p>
-          </div>
+            {/* Course modules */}
+            {modules.map((m) => (
+              <CourseSection key={m.key} title={m.title} moreLabel={m.moreLabel} courses={m.courses}
+                columns={m.cols} variant={m.variant} showRating={m.showRating} showMentor={m.showMentor}
+                showBadge={m.showBadge} badgeLabel={m.badgeLabel} locale={locale}
+                onMore={() => setDrillDown(m.key)} />
+            ))}
+
+            {/* ====== 近期活动 — linked to 院讯 ====== */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-[18px] text-[#000] font-bold m-0 tracking-[calc(var(--ls-scale)*2px)]" style={{ fontFamily: "var(--font-serif)" }}>{s.activity_title}</h2>
+                <Link href={`/${locale}/scholar/news`} className="text-[13px] text-[#000] cursor-pointer hover:underline transition-colors font-bold no-underline" style={{ fontFamily: "var(--font-serif)" }}>{s.activity_more} →</Link>
+              </div>
+              <div className="flex flex-col gap-3">
+                {activityData.map((a) => <ActivityCard key={a.id} newsItem={a} />)}
+              </div>
+            </div>
+          </motion.div>
         )}
-      </div>
-
-      {/* ====== Stats ====== */}
-      <div className="grid grid-cols-4 gap-4 mb-10">
-        {stats.map((st) => <DataStatCard key={st.label} icon={st.icon} value={st.value} label={st.label} sub={st.sub} />)}
-      </div>
-
-      {/* ====== 我的课程 ====== */}
-      <CourseSection title={s.courses_title} moreLabel={s.courses_more} courses={myCourses} columns={4} variant="small" locale={locale} />
-
-      {/* ====== 镇院典籍 ====== */}
-      <CourseSection title={s.featured_title} moreLabel={s.featured_more} courses={featuredCourses} columns={2} variant="large" showRating showMentor locale={locale} />
-
-      {/* ====== 修习必读 ====== */}
-      <CourseSection title={s.required_title} moreLabel={s.required_more} courses={requiredCourses} columns={3} variant="medium" showBadge badgeLabel={s.required_badge} locale={locale} />
-
-      {/* ====== 格物精选 ====== */}
-      <CourseSection title={s.selection_title} moreLabel={s.selection_more} courses={selectionCourses} columns={4} variant="small" locale={locale} />
-
-      {/* ====== 所有课程 ====== */}
-      <CourseSection title="所有课程" moreLabel="查看全部" courses={mentorCourses} columns={4} variant="small" locale={locale} />
-
-      {/* ====== 近期活动 ====== */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[18px] text-[#000] font-bold m-0 tracking-[calc(var(--ls-scale)*2px)]" style={{ fontFamily: "var(--font-serif)" }}>{s.activity_title}</h2>
-          <span className="text-[13px] text-[#000] cursor-pointer hover:text-[#333] hover:underline transition-colors font-bold" style={{ fontFamily: "var(--font-serif)" }}>{s.activity_more} →</span>
-        </div>
-        <div className="flex flex-col gap-3">
-          {activities.map((a) => <ActivityCard key={a.title} date={a.date} month={a.month} title={a.title} time={a.time} location={a.location} speaker={a.speaker} />)}
-        </div>
-      </div>
+      </AnimatePresence>
     </motion.div>
   );
 }
