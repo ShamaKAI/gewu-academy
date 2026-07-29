@@ -58,6 +58,19 @@ const selectionCourses: CourseData[] = [
   { id: "stats-ml",       title: "统计学习基础",         category: "数据科学", cover: COVERS.tongji,   progress: 88, rating: 4.1 },
 ];
 
+const mentorCourses: CourseData[] = [
+  { id: "wealth-foundation",    title: "财富管理的底层逻辑",   category: "理财规划", cover: "https://picsum.photos/seed/wealth-foundation/400/300",   mentor: "栖云先生" },
+  { id: "family-legacy",       title: "家族财富传承",         category: "理财规划", cover: "https://picsum.photos/seed/family-legacy/400/300",      mentor: "栖云先生" },
+  { id: "family-wealth-plan",  title: "家庭财富规划",         category: "理财规划", cover: "https://picsum.photos/seed/family-plan/400/300",       mentor: "知微先生" },
+  { id: "women-wealth",        title: "女性财富成长",         category: "理财规划", cover: "https://picsum.photos/seed/women-wealth/400/300",       mentor: "知微先生" },
+  { id: "global-allocation",   title: "全球资产配置",         category: "投资管理", cover: "https://picsum.photos/seed/global-alloc/400/300",      mentor: "观澜先生" },
+  { id: "value-investing",     title: "长期价值投资",         category: "投资管理", cover: "https://picsum.photos/seed/long-value/400/300",        mentor: "观澜先生" },
+  { id: "corp-wealth-mgmt",    title: "企业财富管理",         category: "企业理财", cover: "https://picsum.photos/seed/corp-wealth/400/300",       mentor: "抱朴先生" },
+  { id: "succession-plan",     title: "企业传承规划",         category: "企业理财", cover: "https://picsum.photos/seed/succession/400/300",        mentor: "抱朴先生" },
+  { id: "ai-wealth-mgmt",      title: "AI时代的财富管理",     category: "科技金融", cover: "https://picsum.photos/seed/ai-wealth/400/300",         mentor: "清衡先生" },
+  { id: "first-wealth-plan",   title: "年轻人的第一份财富规划", category: "理财规划", cover: "https://picsum.photos/seed/first-plan/400/300",      mentor: "清衡先生" },
+];
+
 /* ---------- 原有小组件 ---------- */
 function DataStatCard({ icon, value, label, sub }: { icon: React.ReactNode; value: string; label: string; sub: string }) {
   return (
@@ -237,6 +250,9 @@ export default function ScholarHome() {
 
       {/* ====== 格物精选 ====== */}
       <CourseSection title={s.selection_title} moreLabel={s.selection_more} courses={selectionCourses} columns={4} variant="small" locale={locale} />
+
+      {/* ====== 师者课程 ====== */}
+      <CourseSection title="师者课程" moreLabel="查看全部" courses={mentorCourses} columns={4} variant="small" locale={locale} />
 
       {/* ====== 近期活动 ====== */}
       <div>
