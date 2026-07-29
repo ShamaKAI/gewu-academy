@@ -29,9 +29,10 @@ export default function MentorHome() {
     if (id) {
       const found = mentors.find((m) => m.id === id);
       setMentor(found || null);
-      if (!found) router.push(`/${locale}/mentor/select`);
     } else {
-      router.push(`/${locale}/mentor/select`);
+      // Default to 栖云先生
+      localStorage.setItem("gewu-mentor-id", "qiyun");
+      setMentor(mentors.find((m) => m.id === "qiyun") || null);
     }
   }, [locale, router]);
 

@@ -7,8 +7,10 @@ import { useTranslation } from "@/i18n/useTranslation";
 
 interface LoginModalProps { open: boolean; role: string; onClose: () => void; }
 
-const VALID_USER = "gwxy2026";
-const VALID_PASS = "2026gwxy";
+const VALID_STUDENT = "gwxy2026";
+const VALID_PASS_STUDENT = "2026gwxy";
+const VALID_MENTOR = "AAG000001";
+const VALID_PASS_MENTOR = "AAG000001.gwxy";
 
 export default function LoginModal({ open, role, onClose }: LoginModalProps) {
   const { t, locale } = useTranslation();
@@ -19,17 +21,25 @@ export default function LoginModal({ open, role, onClose }: LoginModalProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (username === VALID_USER && password === VALID_PASS) {
-      setError("");
-      if (role === "mentor") {
-        router.push(`/${locale}/mentor/select`);
-      } else {
+    if (role === "student") {
+      if (username === VALID_STUDENT && password === VALID_PASS_STUDENT) {
+        setError("");
         router.push(`/${locale}/scholar`);
+      } else {
+        setError(t.landing.login_error);
       }
-    } else {
-      setError(t.landing.login_error);
+    } else if (role === "mentor") {
+      if (username === VALID_MENTOR && password === VALID_PASS_MENTOR) {
+        setError("");
+        localStorage.setItem("gewu-mentor-id", "qiyun");
+        router.push(`/${locale}/mentor`);
+      } else {
+        setError(t.landing.login_error);
+      }
     }
   };
+
+  const isLoginable = role === "student" || role === "mentor";
 
   return (
     <AnimatePresence>
@@ -50,9 +60,11 @@ export default function LoginModal({ open, role, onClose }: LoginModalProps) {
             transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
           >
             <h3 className="text-[26px] text-[#000] tracking-[calc(var(--ls-scale)*4px)] text-center mb-8" style={{ fontFamily: "var(--font-calligraphy)" }}>
-              {role === "student" ? t.landing.login_title : t.landing.coming_soon}
+              {role === "student" ? t.landing.login_title
+                : role === "mentor" ? t.landing.login_title_mentor || "先生登录"
+                : t.landing.coming_soon}
             </h3>
-            {role === "student" ? (
+            {isLoginable ? (
               <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                 <div>
                   <label className="block text-[15px] text-[#000] tracking-[calc(var(--ls-scale)*2px)] mb-2" style={{ fontFamily: "var(--font-serif)" }}>{t.landing.username}</label>
