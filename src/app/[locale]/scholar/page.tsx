@@ -251,8 +251,8 @@ export default function ScholarHome() {
       {/* ====== 格物精选 ====== */}
       <CourseSection title={s.selection_title} moreLabel={s.selection_more} courses={selectionCourses} columns={4} variant="small" locale={locale} />
 
-      {/* ====== 师者课程 ====== */}
-      <CourseSection title="师者课程" moreLabel="查看全部" courses={mentorCourses} columns={4} variant="small" locale={locale} />
+      {/* ====== 所有课程 ====== */}
+      <CourseSection title="所有课程" moreLabel="查看全部" courses={mentorCourses} columns={4} variant="small" locale={locale} />
 
       {/* ====== 近期活动 ====== */}
       <div>

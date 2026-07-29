@@ -1,11 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import CourseCard, { type CourseData } from "./CourseCard";
 
 /* ============================================================
    CourseSection — 模块容器（标题栏 + 卡片网格）
-   columns: 2 | 3 | 4
+   columns: 2 | 3 | 4  — 查看更多默认跳转到典籍页
    ============================================================ */
 
 interface CourseSectionProps {
@@ -35,13 +36,14 @@ export default function CourseSection({
   onMore,
   locale = "zh",
 }: CourseSectionProps) {
-  /* 列数 → grid 类名 */
   const gridClass =
     columns === 2
       ? "grid grid-cols-2 gap-5"
       : columns === 3
         ? "grid grid-cols-3 gap-4"
         : "grid grid-cols-4 gap-4";
+
+  const moreHref = `/${locale}/scholar/courses`;
 
   return (
     <motion.div
@@ -51,7 +53,6 @@ export default function CourseSection({
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
     >
-      {/* -------- 标题栏 -------- */}
       <div className="flex items-center justify-between mb-4">
         <h2
           className="text-[18px] text-[#000] font-bold m-0 tracking-[calc(var(--ls-scale)*2px)]"
@@ -59,16 +60,17 @@ export default function CourseSection({
         >
           {title}
         </h2>
-        <span
-          className="text-[13px] text-[#000] cursor-pointer hover:text-[#333] hover:underline transition-colors font-bold"
-          style={{ fontFamily: "var(--font-serif)" }}
-          onClick={onMore}
-        >
-          {moreLabel} →
-        </span>
+        {onMore ? (
+          <span onClick={onMore}
+            className="text-[13px] text-[#000] cursor-pointer hover:underline transition-colors font-bold"
+            style={{ fontFamily: "var(--font-serif)" }}>{moreLabel} →</span>
+        ) : (
+          <Link href={moreHref}
+            className="text-[13px] text-[#000] cursor-pointer hover:underline transition-colors font-bold no-underline"
+            style={{ fontFamily: "var(--font-serif)" }}>{moreLabel} →</Link>
+        )}
       </div>
 
-      {/* -------- 卡片网格 -------- */}
       <div className={gridClass}>
         {courses.map((course) => (
           <CourseCard
