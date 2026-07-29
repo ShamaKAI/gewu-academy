@@ -18,6 +18,7 @@
     "login_title": "Log Masuk Cendekiawan",
     "login_title_mentor": "Log Masuk Mentor",
     "login_title_alumni": "Log Masuk Alumni",
+    "login_title_dean": "Log Masuk Dekan",
     "username": "Nama Pengguna",
     "password": "Kata Laluan",
     "login_btn": "Masuk Akademi",
@@ -175,5 +176,20 @@
     "alumni_nav_network": "Rangkaian",
     "alumni_nav_achievements": "Pencapaian",
     "alumni_nav_study": "Kajian Saya"
+  },
+  "dean": {
+    "dean_greeting_morning": "Selamat Pagi, {name}",
+    "dean_greeting_afternoon": "Selamat Petang, {name}",
+    "dean_greeting_evening": "Selamat Malam, {name}",
+    "dean_nav_home": "Hal Ehwal Akademi",
+    "dean_nav_mentors": "Mentor",
+    "dean_nav_scholars": "Cendekiawan",
+    "dean_nav_alumni": "Alumni",
+    "dean_nav_courses": "Kursus",
+    "dean_nav_events": "Acara",
+    "dean_nav_forum": "Forum",
+    "dean_nav_achievements": "Pencapaian",
+    "dean_nav_analytics": "Analitik",
+    "dean_nav_messages": "Mesej"
   }
 }

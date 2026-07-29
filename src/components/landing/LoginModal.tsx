@@ -43,10 +43,17 @@ export default function LoginModal({ open, role, onClose }: LoginModalProps) {
       } else {
         setError(t.landing.login_error);
       }
+    } else if (role === "dean") {
+      if (username === VALID_STUDENT && password === VALID_PASS_STUDENT) {
+        setError("");
+        router.push(`/${locale}/dean`);
+      } else {
+        setError(t.landing.login_error);
+      }
     }
   };
 
-  const isLoginable = role === "student" || role === "mentor" || role === "alumni";
+  const isLoginable = role === "student" || role === "mentor" || role === "alumni" || role === "dean";
 
   return (
     <AnimatePresence>
@@ -70,6 +77,7 @@ export default function LoginModal({ open, role, onClose }: LoginModalProps) {
               {role === "student" ? t.landing.login_title
                 : role === "mentor" ? t.landing.login_title_mentor || "先生登录"
                 : role === "alumni" ? t.landing.login_title_alumni || "同窗登录"
+                : role === "dean" ? t.landing.login_title_dean || "山长登录"
                 : t.landing.coming_soon}
             </h3>
             {isLoginable ? (
