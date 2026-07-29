@@ -143,10 +143,9 @@
     "lang_ms": "BM"
   },
   "mentor": {
-    "mentor_greeting_chen": "Selamat Pagi, {name}. Selamat datang ke Portal Mentor.",
-    "mentor_greeting_wu": "Selamat Tengah Hari, {name}. Selamat datang ke Portal Mentor.",
-    "mentor_greeting_afternoon": "Selamat Petang, {name}. Selamat datang ke Portal Mentor.",
-    "mentor_greeting_wan": "Selamat Malam, {name}. Selamat datang ke Portal Mentor.",
+    "mentor_greeting_morning": "Selamat Pagi, {name}",
+    "mentor_greeting_afternoon": "Selamat Petang, {name}",
+    "mentor_greeting_evening": "Selamat Malam, {name}",
     "mentor_nav_lectures": "Kuliah",
     "mentor_nav_library": "Diterbitkan",
     "mentor_nav_new_course": "Kursus Baru",

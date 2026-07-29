@@ -137,10 +137,9 @@
     "lang_ms": "BM"
   },
   "mentor": {
-    "mentor_greeting_chen": "晨安，{name}，欢迎来到格物讲堂。",
-    "mentor_greeting_wu": "午安，{name}，欢迎来到格物讲堂。",
-    "mentor_greeting_afternoon": "午后安，{name}，欢迎来到格物讲堂。",
-    "mentor_greeting_wan": "晚安，{name}，欢迎来到格物讲堂。",
+    "mentor_greeting_morning": "上午好，{name}",
+    "mentor_greeting_afternoon": "下午好，{name}",
+    "mentor_greeting_evening": "晚上好，{name}",
     "mentor_nav_lectures": "讲义",
     "mentor_nav_library": "藏经阁",
     "mentor_nav_new_course": "著书",

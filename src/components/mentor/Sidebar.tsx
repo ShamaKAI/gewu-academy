@@ -1,27 +1,47 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "@/i18n/useTranslation";
+import { motion, AnimatePresence } from "framer-motion";
 
-const NavSection = ({ label, children }: { label: string; children: React.ReactNode }) => (
-  <div className="mb-2">
-    <p className="text-[11px] text-[#000] px-5 py-2 font-bold opacity-40 tracking-[calc(var(--ls-scale)*1.5px)] uppercase m-0" style={{ fontFamily: "var(--font-display)" }}>{label}</p>
-    {children}
-  </div>
-);
+function NavIcon({ name }: { name: string }) {
+  return <img src={`/icons/mentor-${name}.png`} alt="" style={{ width: 26, height: 26, objectFit: "contain", flexShrink: 0 }} />;
+}
 
-function NavLink({ href, label, active, indent }: { href: string; label: string; active: boolean; indent?: boolean }) {
+function NavSection({ iconName, label, defaultOpen, children }: { iconName: string; label: string; defaultOpen?: boolean; children: React.ReactNode }) {
+  const [open, setOpen] = useState(defaultOpen ?? false);
   return (
-    <Link
-      href={href}
-      className={`flex items-center gap-3 ${indent ? "pl-10" : "pl-5"} pr-4 py-2.5 rounded-[10px] text-[15px] tracking-[calc(var(--ls-scale)*1.5px)] transition-all duration-200 no-underline font-bold ${
-        active ? "bg-white text-[#000] shadow-sm" : "text-[#000] hover:bg-white/60"
+    <div>
+      <button onClick={() => setOpen(!open)}
+        className="w-full flex items-center gap-3 px-4 py-3 text-[17px] text-[#000] font-bold bg-transparent border-none cursor-pointer hover:bg-white/40 rounded-[10px] transition-all text-left"
+        style={{ fontFamily: "var(--font-serif)" }}>
+        <NavIcon name={iconName} />
+        <span className="flex-1">{label}</span>
+        <motion.span className="text-[14px] opacity-40" animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>▼</motion.span>
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden ml-4 flex flex-col gap-0.5 mt-1">
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function SubLink({ href, label, active }: { href: string; label: string; active: boolean }) {
+  return (
+    <Link href={href}
+      className={`flex items-center gap-2 pl-8 pr-4 py-2.5 rounded-[8px] text-[15px] no-underline font-bold transition-all ${
+        active ? "bg-white text-[#000] shadow-sm" : "text-[#000] hover:bg-white/50"
       }`}
-      style={{ fontFamily: "var(--font-serif)" }}
-    >
-      {active && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-[#000]" />}
-      <span className="relative">{label}</span>
+      style={{ fontFamily: "var(--font-serif)" }}>
+      {active && <span className="w-[3px] h-4 rounded-full bg-[#000] flex-shrink-0" />}
+      <span className={active ? "" : "ml-[3px]"}>{label}</span>
     </Link>
   );
 }
@@ -32,42 +52,53 @@ export default function MentorSidebar({ mentorName }: { mentorName?: string }) {
   const router = useRouter();
   const s = t.mentor as Record<string, string>;
 
-  const isActive = (path: string) => pathname === `/${locale}${path}` || pathname.startsWith(`/${locale}${path}/`) && path !== "/mentor";
+  const isActive = (path: string) => pathname === `/${locale}${path}`;
 
   return (
     <aside className="fixed left-0 top-0 h-full w-[220px] flex flex-col border-r border-[#000]" style={{ background: "#f7f7f7", zIndex: 40 }}>
-      {/* Logo */}
+      {/* Logo — matching scholar portal style */}
       <div className="px-5 pt-8 pb-4 border-b border-[#000]">
-        <h2 className="text-[19px] text-[#000] tracking-[calc(var(--ls-scale)*2px)] m-0 leading-tight font-bold" style={{ fontFamily: "var(--font-serif)" }}>
-          格物讲堂
-        </h2>
-        <p className="text-[10px] text-[#000] tracking-[calc(var(--ls-scale)*1px)] uppercase m-0 mt-0.5 font-bold opacity-40" style={{ fontFamily: "var(--font-display)" }}>
-          MENTOR PORTAL
-        </p>
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-full bg-[#000] flex items-center justify-center flex-shrink-0">
+            <span className="text-white text-[14px] font-bold" style={{ fontFamily: "var(--font-serif)" }}>讲</span>
+          </div>
+          <div>
+            <h2 className="text-[17px] text-[#000] tracking-[calc(var(--ls-scale)*2px)] m-0 leading-tight font-bold" style={{ fontFamily: "var(--font-serif)" }}>
+              格物讲堂
+            </h2>
+            <p className="text-[9px] text-[#000] tracking-[calc(var(--ls-scale)*1.5px)] uppercase m-0 font-bold" style={{ fontFamily: "var(--font-display)" }}>
+              MENTOR PORTAL
+            </p>
+          </div>
+        </div>
         {mentorName && (
           <p className="text-[12px] text-[#000] m-0 mt-2 font-bold" style={{ fontFamily: "var(--font-serif)" }}>{mentorName}</p>
         )}
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 px-2 py-4 flex flex-col gap-1 overflow-y-auto">
-        <NavSection label={s.mentor_nav_lectures}>
-          <NavLink href={`/${locale}/mentor`} label={s.mentor_nav_library} active={pathname === `/${locale}/mentor`} indent />
-          <NavLink href={`/${locale}/mentor/courses/new`} label={s.mentor_nav_new_course} active={pathname === `/${locale}/mentor/courses/new`} indent />
+      {/* Navigation — accordion */}
+      <nav className="flex-1 px-3 py-4 flex flex-col gap-1 overflow-y-auto">
+        <NavSection iconName="lectures" label={s.mentor_nav_lectures} defaultOpen>
+          <SubLink href={`/${locale}/mentor`} label={s.mentor_nav_library} active={pathname === `/${locale}/mentor`} />
+          <SubLink href={`/${locale}/mentor/courses/new`} label={s.mentor_nav_new_course} active={isActive("/mentor/courses/new")} />
         </NavSection>
-        <NavSection label={s.mentor_nav_events}>
-          <NavLink href={`/${locale}/mentor/events`} label={s.mentor_nav_event_log} active={isActive("/mentor/events")} indent />
-          <NavLink href={`/${locale}/mentor/events/new`} label={s.mentor_nav_new_event} active={pathname === `/${locale}/mentor/events/new`} indent />
+        <NavSection iconName="events" label={s.mentor_nav_events}>
+          <SubLink href={`/${locale}/mentor/events`} label={s.mentor_nav_event_log} active={isActive("/mentor/events")} />
+          <SubLink href={`/${locale}/mentor/events/new`} label={s.mentor_nav_new_event} active={isActive("/mentor/events/new")} />
         </NavSection>
-        <NavSection label={s.mentor_nav_analytics}>
-          <NavLink href={`/${locale}/mentor/analytics`} label={s.mentor_nav_analytics} active={pathname === `/${locale}/mentor/analytics`} indent />
+        <NavSection iconName="analytics" label={s.mentor_nav_analytics}>
+          <SubLink href={`/${locale}/mentor/analytics`} label={s.mentor_nav_analytics} active={isActive("/mentor/analytics")} />
         </NavSection>
       </nav>
 
       {/* Bottom */}
       <div className="px-3 pb-6 flex flex-col gap-1 border-t border-[#000] pt-3">
-        <button onClick={() => router.push(`/${locale}`)} className="flex items-center gap-3 pl-5 pr-4 py-2.5 rounded-[10px] text-[14px] text-[#000] font-bold bg-transparent border-none cursor-pointer hover:bg-white/60 transition-all text-left" style={{ fontFamily: "var(--font-serif)" }}>← {s.mentor_nav_back}</button>
-        <button onClick={() => router.push(`/${locale}`)} className="flex items-center gap-3 pl-5 pr-4 py-2.5 rounded-[10px] text-[14px] text-[#000] font-bold bg-transparent border-none cursor-pointer hover:bg-white/60 transition-all text-left" style={{ fontFamily: "var(--font-serif)" }}>{s.mentor_nav_logout}</button>
+        <button onClick={() => router.push(`/${locale}`)}
+          className="flex items-center gap-3 pl-5 pr-4 py-2.5 rounded-[10px] text-[15px] text-[#000] font-bold bg-transparent border-none cursor-pointer hover:bg-white/60 transition-all text-left"
+          style={{ fontFamily: "var(--font-serif)" }}>← {s.mentor_nav_back}</button>
+        <button onClick={() => router.push(`/${locale}`)}
+          className="flex items-center gap-3 pl-5 pr-4 py-2.5 rounded-[10px] text-[15px] text-[#000] font-bold bg-transparent border-none cursor-pointer hover:bg-white/60 transition-all text-left"
+          style={{ fontFamily: "var(--font-serif)" }}>{s.mentor_nav_logout}</button>
       </div>
     </aside>
   );
