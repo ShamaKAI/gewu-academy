@@ -22,13 +22,13 @@ export default function MentorLayout({ children }: { children: React.ReactNode }
     <div className="flex h-screen overflow-hidden" style={{ background: "#ffffff" }}>
       <MentorSidebar mentorName={mentorName} />
 
-      {/* Background image — low opacity, fixed */}
+      {/* Background image */}
       <div className="fixed inset-0 ml-[220px] pointer-events-none z-0">
-        <img src="/mentor-bg.png" alt="" className="w-full h-full object-cover" style={{ opacity: 0.08 }} />
+        <img src="/mentor-bg.png" alt="" className="w-full h-full object-cover" style={{ opacity: 0.12 }} />
       </div>
 
-      {/* White overlay for readability */}
-      <div className="fixed inset-0 ml-[220px] pointer-events-none z-0" style={{ background: "rgba(255,255,255,0.85)" }} />
+      {/* Light overlay */}
+      <div className="fixed inset-0 ml-[220px] pointer-events-none z-0" style={{ background: "rgba(255,255,255,0.82)" }} />
 
       <main className="flex-1 ml-[220px] overflow-y-auto relative z-10" style={{ height: "100vh" }}>
         <div className="fixed top-3 right-8 z-30"><LangSwitch /></div>

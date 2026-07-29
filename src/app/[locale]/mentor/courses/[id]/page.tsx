@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { courses } from "@/data/courses";
-import type { VideoItem, PptFile, Exercise, ReviewItem } from "@/data/courses";
+import { courses as staticCourses } from "@/data/courses";
+import type { VideoItem, PptFile, Exercise, ReviewItem, Course } from "@/data/courses";
 
 type TabKey = "videos" | "ppt" | "content" | "exercises" | "students" | "reviews" | "data";
 
@@ -46,7 +46,22 @@ function MixedFont({ text }: { text: string }) {
 export default function CourseDetailPage() {
   const params = useParams();
   const courseId = params?.id as string;
-  const course = courses.find((c) => c.id === courseId);
+  // Look up in static + localStorage published courses
+  const [course, setCourse] = useState<Course | null>(null);
+
+  useEffect(() => {
+    let found = staticCourses.find((c) => c.id === courseId) || null;
+    if (!found) {
+      try {
+        const raw = localStorage.getItem("gewu-published-courses");
+        if (raw) {
+          const pub: Course[] = JSON.parse(raw);
+          found = pub.find((c) => c.id === courseId) || null;
+        }
+      } catch {}
+    }
+    setCourse(found);
+  }, [courseId]);
   const [tab, setTab] = useState<TabKey>("videos");
 
   // Local state for editing

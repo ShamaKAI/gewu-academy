@@ -1,18 +1,32 @@
 "use client";
 
-"use client";
-
 import { useMemo, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslation } from "@/i18n/useTranslation";
 import { motion } from "framer-motion";
-import { courses as allCourses } from "@/data/courses";
+import { courses as staticCourses } from "@/data/courses";
+import type { Course } from "@/data/courses";
 import FilterPanel, { type FilterState } from "@/components/scholar/FilterPanel";
 import CourseListCard from "@/components/scholar/CourseListCard";
+
+function loadPublished(): Course[] {
+  try { const raw = localStorage.getItem("gewu-published-courses"); if (raw) return JSON.parse(raw); } catch {}
+  return [];
+}
 
 export default function CoursesPage() {
   const { t, locale } = useTranslation();
   const s = t.scholar as Record<string, string>;
+  const [published, setPublished] = useState<Course[]>([]);
+
+  useEffect(() => { setPublished(loadPublished()); }, []);
+
+  // Merge static + published, dedup by id
+  const allCourses = useMemo(() => {
+    const seen = new Set(staticCourses.map((c) => c.id));
+    const extra = published.filter((c) => !seen.has(c.id));
+    return [...staticCourses, ...extra];
+  }, [published]);
   const searchParams = useSearchParams();
   const urlIds = searchParams?.get("ids") || "";
   const urlCat = searchParams?.get("cat") || "";

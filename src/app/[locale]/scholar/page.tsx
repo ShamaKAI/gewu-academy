@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTranslation } from "@/i18n/useTranslation";
@@ -8,8 +8,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { IconSearch, IconBell, IconMail, IconClock, IconCalendar, IconArrowRight } from "@/components/scholar/Icons";
 import CourseSection from "@/components/scholar/CourseSection";
 import type { CourseData } from "@/components/scholar/CourseCard";
-import { courses as allCourses } from "@/data/courses";
+import { courses as staticCourses } from "@/data/courses";
+import type { Course } from "@/data/courses";
 import { newsItems } from "@/data/news";
+
+function loadPublished(): Course[] {
+  try { const raw = localStorage.getItem("gewu-published-courses"); if (raw) return JSON.parse(raw); } catch {}
+  return [];
+}
 
 /* ============================================================
    格物学院 · 学子端 — 主页面
@@ -59,16 +65,12 @@ const selectionCourses: CourseData[] = [
   { id: "shijing", title: "《诗经》鉴赏", category: "文学艺术", cover: COVERS.shijing, progress: 38, rating: 4.2 },
   { id: "stats-ml", title: "统计学习基础", category: "数据科学", cover: COVERS.tongji, progress: 88, rating: 4.1 },
 ];
-// All courses from data, deduplicated and formatted for display
-const allDisplayCourses: CourseData[] = allCourses
-  .filter((c) => !myCourses.some((m) => m.id === c.id) || true) // keep all
-  .reduce((acc, c) => {
-    if (!acc.find((x) => x.id === c.id)) acc.push({
-      id: c.id, title: c.title, category: c.category,
-      cover: c.coverImage, progress: c.progress, rating: c.rating, mentor: c.instructor,
-    });
-    return acc;
-  }, [] as CourseData[]);
+// All courses from data + published, deduplicated and formatted for display
+const formatCourse = (c: Course): CourseData => ({
+  id: c.id, title: c.title, category: c.category,
+  cover: c.coverImage || `https://picsum.photos/seed/${c.id}/400/250`,
+  progress: c.progress, rating: c.rating, mentor: c.instructor,
+});
 
 /* ── Activities — synced from news data (latest 4 activities) ── */
 const activityData = newsItems.filter((n) => n.category === "activity").slice(0, 4);
@@ -169,6 +171,15 @@ export default function ScholarHome() {
   const [search, setSearch] = useState("");
   const [drillDown, setDrillDown] = useState<DrillKey>(null);
   const username = "SHA";
+  const [pubCourses, setPubCourses] = useState<Course[]>([]);
+
+  useEffect(() => { setPubCourses(loadPublished()); }, []);
+
+  const allCourses = useMemo(() => {
+    const seen = new Set(staticCourses.map((c) => c.id));
+    const extra = pubCourses.filter((c) => !seen.has(c.id));
+    return [...staticCourses, ...extra];
+  }, [pubCourses]);
 
   const getGreeting = () => { const h = new Date().getHours(); if (h < 6) return "晚安"; if (h < 12) return "早安"; if (h < 18) return "午安"; return "晚安"; };
   const greetingWord = getGreeting();
@@ -177,7 +188,7 @@ export default function ScholarHome() {
     if (!search.trim()) return [];
     const q = search.trim().toLowerCase();
     return allCourses.filter((c) => c.title.toLowerCase().includes(q) || c.category.toLowerCase().includes(q) || c.instructor.toLowerCase().includes(q) || c.description.toLowerCase().includes(q)).slice(0, 6);
-  }, [search]);
+  }, [search, allCourses]);
 
   const stats = [
     { icon: <IconClock />, value: s.hero_progress_val, label: s.hero_progress, sub: "本周" },
@@ -191,7 +202,7 @@ export default function ScholarHome() {
     { key: "featured", title: s.featured_title, moreLabel: s.featured_more, previewCourses: featuredCourses, fullCourses: featuredCourses, cols: 2, variant: "large", showRating: true, showMentor: true },
     { key: "required", title: s.required_title, moreLabel: s.required_more, previewCourses: requiredCourses, fullCourses: requiredCourses, cols: 3, variant: "medium", showBadge: true, badgeLabel: s.required_badge },
     { key: "selection", title: s.selection_title, moreLabel: s.selection_more, previewCourses: selectionCourses, fullCourses: selectionCourses, cols: 4, variant: "small" },
-    { key: "mentor", title: "所有课程", moreLabel: "查看全部", previewCourses: allDisplayCourses.slice(0, 12), fullCourses: allDisplayCourses, cols: 4, variant: "small" },
+    { key: "mentor", title: "所有课程", moreLabel: "查看全部", previewCourses: allCourses.map(formatCourse).slice(0, 12), fullCourses: allCourses.map(formatCourse), cols: 4, variant: "small" },
   ];
 
   const activeModule = drillDown ? modules.find((m) => m.key === drillDown) : null;
