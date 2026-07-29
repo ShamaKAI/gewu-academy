@@ -17,6 +17,7 @@
     "role_alumni_desc2": "Bersama Melangkah Jauh",
     "login_title": "Log Masuk Cendekiawan",
     "login_title_mentor": "Log Masuk Mentor",
+    "login_title_alumni": "Log Masuk Alumni",
     "username": "Nama Pengguna",
     "password": "Kata Laluan",
     "login_btn": "Masuk Akademi",
@@ -160,5 +161,19 @@
     "mentor_motto_label": "Moto",
     "mentor_courses_published": "Kursus Diterbitkan",
     "mentor_students_count": "Pelajar"
+  },
+  "alumni": {
+    "alumni_greeting_morning": "Selamat Pagi, {name}",
+    "alumni_greeting_afternoon": "Selamat Petang, {name}",
+    "alumni_greeting_evening": "Selamat Malam, {name}",
+    "alumni_nav_space": "Ruang Akademi",
+    "alumni_nav_personal": "Ruang Peribadi",
+    "alumni_nav_home": "Berita Persatuan",
+    "alumni_nav_forum": "Forum",
+    "alumni_nav_events": "Acara",
+    "alumni_nav_messages": "Surat",
+    "alumni_nav_network": "Rangkaian",
+    "alumni_nav_achievements": "Pencapaian",
+    "alumni_nav_study": "Kajian Saya"
   }
 }

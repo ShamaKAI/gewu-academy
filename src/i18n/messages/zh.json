@@ -17,6 +17,7 @@
     "role_alumni_desc2": "同行致远",
     "login_title": "学子登录",
     "login_title_mentor": "先生登录",
+    "login_title_alumni": "同窗登录",
     "username": "账号",
     "password": "密码",
     "login_btn": "进入书院",
@@ -154,5 +155,19 @@
     "mentor_motto_label": "座右铭",
     "mentor_courses_published": "已刊行典籍",
     "mentor_students_count": "门下学子"
+  },
+  "alumni": {
+    "alumni_greeting_morning": "上午好，{name}",
+    "alumni_greeting_afternoon": "下午好，{name}",
+    "alumni_greeting_evening": "晚上好，{name}",
+    "alumni_nav_space": "书院空间",
+    "alumni_nav_personal": "个人空间",
+    "alumni_nav_home": "同窗录",
+    "alumni_nav_forum": "百家论道",
+    "alumni_nav_events": "雅集",
+    "alumni_nav_messages": "书札",
+    "alumni_nav_network": "同道",
+    "alumni_nav_achievements": "功名录",
+    "alumni_nav_study": "我的书斋"
   }
 }

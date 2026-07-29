@@ -36,10 +36,17 @@ export default function LoginModal({ open, role, onClose }: LoginModalProps) {
       } else {
         setError(t.landing.login_error);
       }
+    } else if (role === "alumni") {
+      if (username === VALID_STUDENT && password === VALID_PASS_STUDENT) {
+        setError("");
+        router.push(`/${locale}/alumni`);
+      } else {
+        setError(t.landing.login_error);
+      }
     }
   };
 
-  const isLoginable = role === "student" || role === "mentor";
+  const isLoginable = role === "student" || role === "mentor" || role === "alumni";
 
   return (
     <AnimatePresence>
@@ -62,6 +69,7 @@ export default function LoginModal({ open, role, onClose }: LoginModalProps) {
             <h3 className="text-[26px] text-[#000] tracking-[calc(var(--ls-scale)*4px)] text-center mb-8" style={{ fontFamily: "var(--font-calligraphy)" }}>
               {role === "student" ? t.landing.login_title
                 : role === "mentor" ? t.landing.login_title_mentor || "先生登录"
+                : role === "alumni" ? t.landing.login_title_alumni || "同窗登录"
                 : t.landing.coming_soon}
             </h3>
             {isLoginable ? (

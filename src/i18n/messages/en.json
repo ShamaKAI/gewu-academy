@@ -17,6 +17,7 @@
     "role_alumni_desc2": "Together We Go Far",
     "login_title": "Scholar Login",
     "login_title_mentor": "Mentor Login",
+    "login_title_alumni": "Alumni Login",
     "username": "Username",
     "password": "Password",
     "login_btn": "Enter Academy",
@@ -160,5 +161,19 @@
     "mentor_motto_label": "Motto",
     "mentor_courses_published": "Published Courses",
     "mentor_students_count": "Students"
+  },
+  "alumni": {
+    "alumni_greeting_morning": "Good Morning, {name}",
+    "alumni_greeting_afternoon": "Good Afternoon, {name}",
+    "alumni_greeting_evening": "Good Evening, {name}",
+    "alumni_nav_space": "Academy Space",
+    "alumni_nav_personal": "Personal Space",
+    "alumni_nav_home": "Guild News",
+    "alumni_nav_forum": "Forum",
+    "alumni_nav_events": "Events",
+    "alumni_nav_messages": "Letters",
+    "alumni_nav_network": "Network",
+    "alumni_nav_achievements": "Honors",
+    "alumni_nav_study": "My Study"
   }
 }
