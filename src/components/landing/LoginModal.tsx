@@ -21,7 +21,11 @@ export default function LoginModal({ open, role, onClose }: LoginModalProps) {
     e.preventDefault();
     if (username === VALID_USER && password === VALID_PASS) {
       setError("");
-      router.push(`/${locale}/scholar`);
+      if (role === "mentor") {
+        router.push(`/${locale}/mentor/select`);
+      } else {
+        router.push(`/${locale}/scholar`);
+      }
     } else {
       setError(t.landing.login_error);
     }

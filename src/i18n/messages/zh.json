@@ -134,5 +134,25 @@
     "lang_zh": "中文",
     "lang_en": "EN",
     "lang_ms": "BM"
+  },
+  "mentor": {
+    "mentor_greeting_chen": "晨安，{name}，欢迎来到格物讲堂。",
+    "mentor_greeting_wu": "午安，{name}，欢迎来到格物讲堂。",
+    "mentor_greeting_afternoon": "午后安，{name}，欢迎来到格物讲堂。",
+    "mentor_greeting_wan": "晚安，{name}，欢迎来到格物讲堂。",
+    "mentor_nav_lectures": "讲义",
+    "mentor_nav_library": "藏经阁",
+    "mentor_nav_new_course": "著书",
+    "mentor_nav_events": "雅集",
+    "mentor_nav_event_log": "雅集录",
+    "mentor_nav_new_event": "发起雅集",
+    "mentor_nav_analytics": "书录",
+    "mentor_nav_back": "返回书院",
+    "mentor_nav_logout": "退出登录",
+    "mentor_select_title": "选择先生身份",
+    "mentor_edit_profile": "编辑资料",
+    "mentor_motto_label": "座右铭",
+    "mentor_courses_published": "已刊行典籍",
+    "mentor_students_count": "门下学子"
   }
 }

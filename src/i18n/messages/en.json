@@ -140,5 +140,25 @@
     "lang_zh": "中文",
     "lang_en": "EN",
     "lang_ms": "BM"
+  },
+  "mentor": {
+    "mentor_greeting_chen": "Good Morning, {name}. Welcome to the Mentor Portal.",
+    "mentor_greeting_wu": "Good Afternoon, {name}. Welcome to the Mentor Portal.",
+    "mentor_greeting_afternoon": "Good Afternoon, {name}. Welcome to the Mentor Portal.",
+    "mentor_greeting_wan": "Good Evening, {name}. Welcome to the Mentor Portal.",
+    "mentor_nav_lectures": "Lectures",
+    "mentor_nav_library": "Published",
+    "mentor_nav_new_course": "New Course",
+    "mentor_nav_events": "Events",
+    "mentor_nav_event_log": "Event Log",
+    "mentor_nav_new_event": "New Event",
+    "mentor_nav_analytics": "Analytics",
+    "mentor_nav_back": "Back to Academy",
+    "mentor_nav_logout": "Logout",
+    "mentor_select_title": "Select Mentor Identity",
+    "mentor_edit_profile": "Edit Profile",
+    "mentor_motto_label": "Motto",
+    "mentor_courses_published": "Published Courses",
+    "mentor_students_count": "Students"
   }
 }
