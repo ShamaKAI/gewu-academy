@@ -10,6 +10,10 @@ function NavIcon({ name }: { name: string }) {
   return <img src={`/icons/mentor-${name}.png`} alt="" style={{ width: 26, height: 26, objectFit: "contain", flexShrink: 0 }} />;
 }
 
+function SubIcon({ name }: { name: string }) {
+  return <img src={`/icons/mentor-${name}.png`} alt="" style={{ width: 20, height: 20, objectFit: "contain", flexShrink: 0 }} />;
+}
+
 function NavSection({ iconName, label, defaultOpen, children }: { iconName: string; label: string; defaultOpen?: boolean; children: React.ReactNode }) {
   const [open, setOpen] = useState(defaultOpen ?? false);
   return (
@@ -33,15 +37,15 @@ function NavSection({ iconName, label, defaultOpen, children }: { iconName: stri
   );
 }
 
-function SubLink({ href, label, active }: { href: string; label: string; active: boolean }) {
+function SubLink({ href, iconName, label, active }: { href: string; iconName: string; label: string; active: boolean }) {
   return (
     <Link href={href}
-      className={`flex items-center gap-2 pl-8 pr-4 py-2.5 rounded-[8px] text-[15px] no-underline font-bold transition-all ${
+      className={`flex items-center gap-2.5 pl-8 pr-4 py-2.5 rounded-[8px] text-[15px] no-underline font-bold transition-all ${
         active ? "bg-white text-[#000] shadow-sm" : "text-[#000] hover:bg-white/50"
       }`}
       style={{ fontFamily: "var(--font-serif)" }}>
-      {active && <span className="w-[3px] h-4 rounded-full bg-[#000] flex-shrink-0" />}
-      <span className={active ? "" : "ml-[3px]"}>{label}</span>
+      <SubIcon name={iconName} />
+      <span>{label}</span>
     </Link>
   );
 }
@@ -56,7 +60,7 @@ export default function MentorSidebar({ mentorName }: { mentorName?: string }) {
 
   return (
     <aside className="fixed left-0 top-0 h-full w-[220px] flex flex-col border-r border-[#000]" style={{ background: "#f7f7f7", zIndex: 40 }}>
-      {/* Logo — matching scholar portal style */}
+      {/* Logo */}
       <div className="px-5 pt-8 pb-4 border-b border-[#000]">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-10 h-10 rounded-full bg-[#000] flex items-center justify-center flex-shrink-0">
@@ -76,22 +80,21 @@ export default function MentorSidebar({ mentorName }: { mentorName?: string }) {
         )}
       </div>
 
-      {/* Navigation — accordion */}
+      {/* Navigation */}
       <nav className="flex-1 px-3 py-4 flex flex-col gap-1 overflow-y-auto">
         <NavSection iconName="lectures" label={s.mentor_nav_lectures} defaultOpen>
-          <SubLink href={`/${locale}/mentor`} label={s.mentor_nav_library} active={pathname === `/${locale}/mentor`} />
-          <SubLink href={`/${locale}/mentor/courses/new`} label={s.mentor_nav_new_course} active={isActive("/mentor/courses/new")} />
+          <SubLink href={`/${locale}/mentor`} iconName="library" label={s.mentor_nav_library} active={pathname === `/${locale}/mentor`} />
+          <SubLink href={`/${locale}/mentor/courses/new`} iconName="new-course" label={s.mentor_nav_new_course} active={isActive("/mentor/courses/new")} />
         </NavSection>
         <NavSection iconName="events" label={s.mentor_nav_events}>
-          <SubLink href={`/${locale}/mentor/events`} label={s.mentor_nav_event_log} active={isActive("/mentor/events")} />
-          <SubLink href={`/${locale}/mentor/events/new`} label={s.mentor_nav_new_event} active={isActive("/mentor/events/new")} />
+          <SubLink href={`/${locale}/mentor/events`} iconName="event-log" label={s.mentor_nav_event_log} active={isActive("/mentor/events")} />
+          <SubLink href={`/${locale}/mentor/events/new`} iconName="new-event" label={s.mentor_nav_new_event} active={isActive("/mentor/events/new")} />
         </NavSection>
         <NavSection iconName="analytics" label={s.mentor_nav_analytics}>
-          <SubLink href={`/${locale}/mentor/analytics`} label={s.mentor_nav_analytics} active={isActive("/mentor/analytics")} />
+          <SubLink href={`/${locale}/mentor/analytics`} iconName="analytics" label={s.mentor_nav_analytics} active={isActive("/mentor/analytics")} />
         </NavSection>
       </nav>
 
-      {/* Bottom */}
       <div className="px-3 pb-6 flex flex-col gap-1 border-t border-[#000] pt-3">
         <button onClick={() => router.push(`/${locale}`)}
           className="flex items-center gap-3 pl-5 pr-4 py-2.5 rounded-[10px] text-[15px] text-[#000] font-bold bg-transparent border-none cursor-pointer hover:bg-white/60 transition-all text-left"
