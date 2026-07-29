@@ -36,24 +36,24 @@ export default function RadarChart({ labels, values, avgValues, size = 320, colo
           const a = angleStep * i - Math.PI / 2;
           return <line key={`ax-${i}`} x1={cx} y1={cy} x2={cx + Math.cos(a) * r} y2={cy + Math.sin(a) * r} stroke="#ddd" strokeWidth={0.5} opacity={0.4} />;
         })}
-        {/* School average polygon */}
+        {/* School average polygon — light blue solid fill, no dash */}
         {avgValues && (
-          <motion.polygon points={points(avgValues, 1)} fill={`${avgColor}10`} stroke={avgColor} strokeWidth={2} strokeDasharray="6 3"
+          <motion.polygon points={points(avgValues, 1)} fill="rgba(147,197,253,0.25)" stroke="#93c5fd" strokeWidth={2}
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.2 }} />
         )}
-        {/* User data polygon */}
-        <motion.polygon points={points(values, 1)} fill={`${color}15`} stroke={color} strokeWidth={2.5}
+        {/* User data polygon — all green */}
+        <motion.polygon points={points(values, 1)} fill="rgba(56,142,60,0.15)" stroke="#388e3c" strokeWidth={2.5}
           initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6 }}
           style={{ transformOrigin: "center", transformBox: "fill-box" }} />
-        {/* Dots — user */}
+        {/* Dots — user green */}
         {values.map((v, i) => {
           const a = angleStep * i - Math.PI / 2;
-          return <circle key={`dot-${i}`} cx={cx + Math.cos(a) * (v/100) * r} cy={cy + Math.sin(a) * (v/100) * r} r={4} fill={color} stroke="#fff" strokeWidth={1.5} />;
+          return <circle key={`dot-${i}`} cx={cx + Math.cos(a) * (v/100) * r} cy={cy + Math.sin(a) * (v/100) * r} r={4} fill="#388e3c" stroke="#fff" strokeWidth={1.5} />;
         })}
-        {/* Dots — avg */}
+        {/* Dots — avg light blue */}
         {avgValues && avgValues.map((v, i) => {
           const a = angleStep * i - Math.PI / 2;
-          return <circle key={`adot-${i}`} cx={cx + Math.cos(a) * (v/100) * r} cy={cy + Math.sin(a) * (v/100) * r} r={3} fill={avgColor} />;
+          return <circle key={`adot-${i}`} cx={cx + Math.cos(a) * (v/100) * r} cy={cy + Math.sin(a) * (v/100) * r} r={3} fill="#93c5fd" />;
         })}
         {/* Axis labels — farther out for full visibility */}
         {labels.map((l, i) => {
