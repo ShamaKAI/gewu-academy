@@ -52,8 +52,8 @@ export default function RoleCards({ visible, onSelectRole }: RoleCardsProps) {
   const roles = [
     { role: "student", icon: "/icon-1.png" },
     { role: "mentor", icon: "/icon-2.png" },
-    { role: "dean", icon: "/icon-3.png" },
     { role: "alumni", icon: "/alumina.png" },
+    { role: "dean", icon: "/icon-3.png" },
   ];
 
   const getDesc = (role: string) => {
