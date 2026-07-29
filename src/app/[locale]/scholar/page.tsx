@@ -91,7 +91,7 @@ function ActivityCard({ newsItem, locale }: { newsItem: typeof newsItems[number]
   return (
     <motion.div className="flex gap-4 p-4 bg-white rounded-[12px] border border-[#000] cursor-pointer"
       whileHover={{ y: -2, boxShadow: "0 1px 6px rgba(0,0,0,0.05)" }}
-      onClick={() => router.push(`/${locale}/scholar/news`)}>
+      onClick={() => router.push(`/${locale}/scholar/news?open=${newsItem.id}`)}>
       <img src={newsItem.cover} alt={newsItem.title} className="w-[80px] h-[60px] rounded-[8px] object-cover flex-shrink-0" />
       <div className="flex-1 min-w-0">
         <h4 className="text-[15px] text-[#000] font-bold m-0 mb-1" style={{ fontFamily: "var(--font-serif)" }}>{newsItem.title}</h4>
