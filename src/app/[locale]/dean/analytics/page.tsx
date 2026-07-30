@@ -16,10 +16,10 @@ export default function DeanAnalyticsPage() {
 
       {/* KPI Row */}
       <div className="grid grid-cols-4 gap-4 mb-8">
-        <KPI icon="📖" value={String(courses.length)} label="典籍" sub="已刊行" />
-        <KPI icon="👨‍🏫" value="10" label="师者" sub="已认证" />
-        <KPI icon="🎓" value="320" label="学子" sub="学习中" />
-        <KPI icon="🤝" value="158" label="同窗" sub="5国" />
+        <KPI iconName="courses" value={String(courses.length)} label="典籍" sub="已刊行" />
+        <KPI iconName="mentors" value="10" label="师者" sub="已认证" />
+        <KPI iconName="scholars" value="320" label="学子" sub="学习中" />
+        <KPI iconName="alumni" value="158" label="同窗" sub="5国" />
       </div>
 
       {/* Course ranking */}
@@ -68,6 +68,6 @@ export default function DeanAnalyticsPage() {
     </motion.div>
   );
 }
-function KPI({ icon, value, label, sub }: { icon: string; value: string; label: string; sub: string }) {
-  return <div className="p-5 bg-[#fafafa] rounded-[14px] border-2 border-[#000] text-center"><p className="text-[26px] m-0 mb-1">{icon}</p><p className="text-[26px] text-[#000] font-bold m-0" style={{ fontFamily: "'Times New Roman', serif" }}>{value}</p><p className="text-[13px] text-[#000] font-bold m-0 mt-1" style={{ fontFamily: "var(--font-serif)" }}>{label}</p><p className="text-[11px] text-[#000] opacity-50 m-0" style={{ fontFamily: "var(--font-serif)" }}>{sub}</p></div>;
+function KPI({ iconName, value, label, sub }: { iconName: string; value: string; label: string; sub: string }) {
+  return <div className="p-5 bg-[#fafafa] rounded-[14px] border-2 border-[#000] text-center"><img src={`/icons/dean-stat-${iconName}.png`} alt="" className="w-16 h-16 mx-auto mb-2 object-contain" /><p className="text-[26px] text-[#000] font-bold m-0" style={{ fontFamily: "'Times New Roman', serif" }}>{value}</p><p className="text-[13px] text-[#000] font-bold m-0 mt-1" style={{ fontFamily: "var(--font-serif)" }}>{label}</p><p className="text-[11px] text-[#000] opacity-50 m-0" style={{ fontFamily: "var(--font-serif)" }}>{sub}</p></div>;
 }

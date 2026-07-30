@@ -91,7 +91,7 @@ export default function DeanHome() {
 function StatCard({ iconName, value, label }: { iconName: string; value: string; label: string }) {
   return (
     <div className="p-5 bg-[#fafafa] rounded-[14px] border-2 border-[#000] text-center">
-      <img src={`/icons/dean-stat-${iconName}.png`} alt="" className="w-8 h-8 mx-auto mb-2 object-contain" />
+      <img src={`/icons/dean-stat-${iconName}.png`} alt="" className="w-16 h-16 mx-auto mb-2 object-contain" />
       <p className="text-[26px] text-[#000] font-bold m-0" style={{ fontFamily: "'Times New Roman', serif" }}>{value}</p>
       <p className="text-[12px] text-[#000] opacity-50 m-0 mt-1" style={{ fontFamily: "var(--font-serif)" }}>{label}</p>
     </div>
@@ -100,7 +100,7 @@ function StatCard({ iconName, value, label }: { iconName: string; value: string;
 function QuickCard({ iconName, label, value }: { iconName: string; label: string; value: string }) {
   return (
     <div className="flex items-center gap-3 p-4 bg-white rounded-[12px] border border-[#000]">
-      <img src={`/icons/dean-stat-${iconName}.png`} alt="" className="w-6 h-6 object-contain flex-shrink-0" />
+      <img src={`/icons/dean-stat-${iconName}.png`} alt="" className="w-12 h-12 object-contain flex-shrink-0" />
       <span className="text-[13px] text-[#000] flex-1 font-bold" style={{ fontFamily: "var(--font-serif)" }}>{label}</span>
       <span className="text-[16px] text-[#000] font-bold" style={{ fontFamily: "'Times New Roman', serif" }}>{value}</span>
     </div>

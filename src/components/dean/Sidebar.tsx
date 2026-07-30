@@ -18,7 +18,7 @@ const navItems = [
 ] as const;
 
 function NavIcon({ name }: { name: string }) {
-  return <img src={`/icons/dean-${name}.png`} alt="" style={{ width: 26, height: 26, objectFit: "contain", flexShrink: 0 }} />;
+  return <img src={`/icons/dean-${name}.png`} alt="" style={{ width: 52, height: 52, objectFit: "contain", flexShrink: 0 }} />;
 }
 
 export default function DeanSidebar() {
