@@ -49,11 +49,11 @@ export default function DeanHome() {
 
       {/* Stats grid */}
       <div className="grid grid-cols-5 gap-4 mb-10">
-        <StatCard icon="📖" value={String(totalCourses)} label="典籍" />
-        <StatCard icon="👨‍🏫" value={String(totalMentors)} label="师者" />
-        <StatCard icon="🎓" value={String(totalScholars)} label="学子" />
-        <StatCard icon="🤝" value={String(totalAlumni)} label="同窗" />
-        <StatCard icon="🎋" value={String(upcomingEvents)} label="雅集" />
+        <StatCard iconName="courses" value={String(totalCourses)} label="典籍" />
+        <StatCard iconName="mentors" value={String(totalMentors)} label="师者" />
+        <StatCard iconName="scholars" value={String(totalScholars)} label="学子" />
+        <StatCard iconName="alumni" value={String(totalAlumni)} label="同窗" />
+        <StatCard iconName="events" value={String(upcomingEvents)} label="雅集" />
       </div>
 
       {/* 今日院务 */}
@@ -78,29 +78,29 @@ export default function DeanHome() {
         {/* Quick stats panel */}
         <div className="space-y-3">
           <h2 className="text-[20px] text-[#000] font-bold m-0 mb-4" style={{ fontFamily: "var(--font-serif)" }}>书院概况</h2>
-          <QuickCard icon="📚" label="课程完成率" value="82%" />
-          <QuickCard icon="⭐" label="平均评分" value="4.6" />
-          <QuickCard icon="🌏" label="覆盖国家" value="5" />
-          <QuickCard icon="📈" label="月度新增" value="+28" />
+          <QuickCard iconName="completion" label="课程完成率" value="82%" />
+          <QuickCard iconName="rating" label="平均评分" value="4.6" />
+          <QuickCard iconName="countries" label="覆盖国家" value="5" />
+          <QuickCard iconName="growth" label="月度新增" value="+28" />
         </div>
       </div>
     </motion.div>
   );
 }
 
-function StatCard({ icon, value, label }: { icon: string; value: string; label: string }) {
+function StatCard({ iconName, value, label }: { iconName: string; value: string; label: string }) {
   return (
     <div className="p-5 bg-[#fafafa] rounded-[14px] border-2 border-[#000] text-center">
-      <p className="text-[24px] m-0 mb-1">{icon}</p>
+      <img src={`/icons/dean-stat-${iconName}.png`} alt="" className="w-8 h-8 mx-auto mb-2 object-contain" />
       <p className="text-[26px] text-[#000] font-bold m-0" style={{ fontFamily: "'Times New Roman', serif" }}>{value}</p>
       <p className="text-[12px] text-[#000] opacity-50 m-0 mt-1" style={{ fontFamily: "var(--font-serif)" }}>{label}</p>
     </div>
   );
 }
-function QuickCard({ icon, label, value }: { icon: string; label: string; value: string }) {
+function QuickCard({ iconName, label, value }: { iconName: string; label: string; value: string }) {
   return (
     <div className="flex items-center gap-3 p-4 bg-white rounded-[12px] border border-[#000]">
-      <span className="text-[20px]">{icon}</span>
+      <img src={`/icons/dean-stat-${iconName}.png`} alt="" className="w-6 h-6 object-contain flex-shrink-0" />
       <span className="text-[13px] text-[#000] flex-1 font-bold" style={{ fontFamily: "var(--font-serif)" }}>{label}</span>
       <span className="text-[16px] text-[#000] font-bold" style={{ fontFamily: "'Times New Roman', serif" }}>{value}</span>
     </div>

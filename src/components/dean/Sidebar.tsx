@@ -5,17 +5,21 @@ import { usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "@/i18n/useTranslation";
 
 const navItems = [
-  { key: "home", href: "", icon: "🏛" },
-  { key: "mentors", href: "/mentors", icon: "👨‍🏫" },
-  { key: "scholars", href: "/scholars", icon: "🎓" },
-  { key: "alumni", href: "/alumni", icon: "🤝" },
-  { key: "courses", href: "/courses", icon: "📖" },
-  { key: "events", href: "/events", icon: "🎋" },
-  { key: "forum", href: "/forum", icon: "📜" },
-  { key: "achievements", href: "/achievements", icon: "🏆" },
-  { key: "analytics", href: "/analytics", icon: "📊" },
-  { key: "messages", href: "/messages", icon: "✉" },
+  { key: "home",         href: "",            icon: "home" },
+  { key: "mentors",      href: "/mentors",     icon: "mentors" },
+  { key: "scholars",     href: "/scholars",    icon: "scholars" },
+  { key: "alumni",       href: "/alumni",      icon: "alumni" },
+  { key: "courses",      href: "/courses",     icon: "courses" },
+  { key: "events",       href: "/events",      icon: "events" },
+  { key: "forum",        href: "/forum",       icon: "forum" },
+  { key: "achievements", href: "/achievements", icon: "achievements" },
+  { key: "analytics",    href: "/analytics",   icon: "analytics" },
+  { key: "messages",     href: "/messages",    icon: "messages" },
 ] as const;
+
+function NavIcon({ name }: { name: string }) {
+  return <img src={`/icons/dean-${name}.png`} alt="" style={{ width: 26, height: 26, objectFit: "contain", flexShrink: 0 }} />;
+}
 
 export default function DeanSidebar() {
   const { t, locale } = useTranslation();
@@ -48,7 +52,7 @@ export default function DeanSidebar() {
                 active ? "bg-white text-[#000] shadow-sm" : "text-[#000] hover:bg-white/50"
               }`}
               style={{ fontFamily: "var(--font-serif)" }}>
-              <span className="text-[18px] w-6 text-center">{item.icon}</span>
+              <NavIcon name={item.icon} />
               <span>{s[`dean_nav_${item.key}`] || item.key}</span>
             </Link>
           );
